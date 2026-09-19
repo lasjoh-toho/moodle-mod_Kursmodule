@@ -1,0 +1,118 @@
+/* This file is part of Moodle - http://moodle.org/ */
+/* Styles fuer mod_kursmodule: Banner-Leiste (view.php) + Verwaltungsliste (manage.php) */
+
+.kursmodule-banner-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kursmodule-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 999px;
+    text-decoration: none;
+    color: inherit;
+    background: #2b2d33;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    position: relative;
+}
+
+.kursmodule-banner:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.kursmodule-banner-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.kursmodule-banner-img-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 600;
+}
+
+.kursmodule-banner-title {
+    color: #fff;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.kursmodule-banner-badge {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+/* Der aktuelle Kurs: kraeftiger Glow, klar hervorgehoben. */
+.kursmodule-banner-current {
+    background: #2f6feb;
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.5), 0 0 18px 4px rgba(79, 140, 255, 0.65);
+}
+
+.kursmodule-banner-current:hover {
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.65), 0 0 26px 6px rgba(79, 140, 255, 0.85);
+}
+
+/* Die uebrigen Verknuepfungen: sichtbar dunkler, aber weiterhin klar
+   klickbar und funktional - kein reduzierter Kontrast, nur reduzierte
+   Helligkeit. */
+.kursmodule-banner-dim {
+    filter: brightness(0.72);
+}
+
+.kursmodule-banner-dim:hover {
+    filter: brightness(0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+    .kursmodule-banner {
+        background: #1c1e24;
+    }
+}
+
+/* Verwaltungsseite (manage.php) */
+
+.kursmodule-link-row {
+    cursor: grab;
+}
+
+.kursmodule-link-row.kursmodule-dragging {
+    opacity: 0.4;
+}
+
+.kursmodule-link-inactive {
+    opacity: 0.6;
+}
+
+.kursmodule-drag-handle {
+    cursor: grab;
+    user-select: none;
+    font-size: 1.1em;
+    opacity: 0.6;
+}
+
+.kursmodule-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.kursmodule-link-actions {
+    white-space: nowrap;
+}
