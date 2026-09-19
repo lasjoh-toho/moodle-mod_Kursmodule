@@ -3,8 +3,8 @@
 
 /**
  * Schueler/innen-Ansicht: zeigt die aktiven Kursverknuepfungen als
- * Banner-Leiste. Ein Klick fuehrt direkt in den verlinkten Kurs - die
- * Einschreibung ist zu diesem Zeitpunkt bereits automatisch erfolgt.
+ * Banner-Leiste. Ein Klick fuehrt ueber go.php in den verlinkten Kurs -
+ * die Einschreibung entsteht dort erst im Moment des Klicks.
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -26,7 +26,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/kursmodule:view', $context);
 
-$event = \core\event\course_module_viewed::create([
+$event = \mod_kursmodule\event\course_module_viewed::create([
     'objectid' => $kursmodule->id,
     'context' => $context,
 ]);
