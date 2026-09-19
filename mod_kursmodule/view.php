@@ -99,10 +99,11 @@ foreach ($links as $link) {
         );
         break;
     }
-    // Kein Fallback auf ein automatisch ermitteltes Kursbild - dessen
-    // interne API unterscheidet sich zu sehr zwischen Moodle-Versionen.
-    // Ohne eigenes Banner-Bild wird stattdessen ein einfacher Platzhalter
-    // mit dem Anfangsbuchstaben des Kursnamens gezeigt.
+    if (!$imageurl) {
+        // Kein eigenes Banner-Bild hinterlegt - auf das Kursbild des
+        // Zielkurses zurueckfallen (sofern eines gesetzt ist).
+        $imageurl = kursmodule_get_courseimage_url((int) $targetcourse->id);
+    }
 
     // Fuehrt ueber go.php: dort wird erst im Moment des Klicks eingeschrieben.
     $courseurl = new moodle_url('/mod/kursmodule/go.php', ['id' => $id, 'linkid' => $link->id]);

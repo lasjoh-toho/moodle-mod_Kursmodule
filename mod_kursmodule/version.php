@@ -21,7 +21,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_kursmodule';
-$plugin->version   = 2026091902;
+$plugin->version   = 2026092000;
 $plugin->requires  = 2022041900; // Moodle 4.0+.
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '1.1.1';
+$plugin->release   = '1.2.0';

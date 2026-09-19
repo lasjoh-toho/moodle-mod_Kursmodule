@@ -120,6 +120,42 @@ function kursmodule_get_coursemodule_info($cm) {
 }
 
 /**
+ * Ermittelt die URL des Kursbilds eines Kurses (Dateibereich
+ * 'course'/'overviewfiles', itemid 0) - derselbe Mechanismus, den auch
+ * die Kurskachel-Ansicht auf dem Dashboard nutzt. Direkter Zugriff auf
+ * die File-API statt einer Wrapper-Funktion, deren Signatur sich
+ * zwischen Moodle-Versionen unterscheidet.
+ *
+ * @param int $courseid
+ * @return moodle_url|null
+ */
+function kursmodule_get_courseimage_url(int $courseid): ?moodle_url {
+    $coursecontext = context_course::instance($courseid, IGNORE_MISSING);
+    if (!$coursecontext) {
+        return null;
+    }
+
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($coursecontext->id, 'course', 'overviewfiles', 0, 'sortorder DESC, id ASC', false);
+
+    foreach ($files as $file) {
+        $mimetype = $file->get_mimetype();
+        if ($mimetype && strpos($mimetype, 'image/') === 0) {
+            return moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea(),
+                $file->get_itemid(),
+                $file->get_filepath(),
+                $file->get_filename()
+            );
+        }
+    }
+
+    return null;
+}
+
+/**
  * Datei-Zugriff fuer Banner-Bilder (Dateibereich 'linkimage', itemid = link id).
  *
  * @param stdClass $course
