@@ -6,24 +6,20 @@ namespace mod_kursmodule;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Event-Beobachter: haelt die automatischen Einschreibungen in verlinkten
- * Kursen synchron zur Schueler/innen-Mitgliedschaft im Hauptkurs.
+ * Event-Beobachter: schreibt Personen, die den Hauptkurs verlassen oder
+ * dort ihre "student"-Rolle verlieren, automatisch aus allen darueber
+ * erzeugten Einschreibungen in verlinkten Kursen wieder aus.
+ *
+ * Es gibt bewusst KEINE Beobachter fuer neue Einschreibungen/Rollen im
+ * Hauptkurs - eine Einschreibung in einen verlinkten Kurs entsteht
+ * ausschliesslich per Klick auf den jeweiligen Banner (siehe go.php,
+ * link_manager::handle_click()), nicht proaktiv im Hintergrund.
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
-    /**
-     * Neue Einschreibung im (moeglichen) Hauptkurs.
-     *
-     * @param \core\event\user_enrolment_created $event
-     * @return void
-     */
-    public static function user_enrolment_created(\core\event\user_enrolment_created $event): void {
-        link_manager::sync_user_join((int) $event->courseid, (int) $event->relateduserid);
-    }
 
     /**
      * Ausschreibung aus dem (moeglichen) Hauptkurs.
@@ -33,23 +29,6 @@ class observer {
      */
     public static function user_enrolment_deleted(\core\event\user_enrolment_deleted $event): void {
         link_manager::sync_user_leave((int) $event->courseid, (int) $event->relateduserid);
-    }
-
-    /**
-     * Rollenzuweisung (deckt z. B. einen Rollenwechsel auf "student" ohne
-     * erneute Einschreibung ab).
-     *
-     * @param \core\event\role_assigned $event
-     * @return void
-     */
-    public static function role_assigned(\core\event\role_assigned $event): void {
-        if ($event->contextlevel != CONTEXT_COURSE) {
-            return;
-        }
-        if ((int) $event->objectid !== enrolment_manager::resolve_roleid('student')) {
-            return;
-        }
-        link_manager::sync_user_join((int) $event->courseid, (int) $event->relateduserid);
     }
 
     /**

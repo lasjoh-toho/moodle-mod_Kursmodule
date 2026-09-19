@@ -6,11 +6,12 @@ namespace mod_kursmodule\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Geplante Aufgabe: gleicht regelmaessig alle aktiven Kursverknuepfungen
- * mit der tatsaechlichen Schueler/innen-Mitgliedschaft im jeweiligen
- * Hauptkurs ab. Dient als Sicherheitsnetz, falls durch Massenoperationen
- * (Bulk-Einschreibung, Kohorten-Sync, Import) einzelne Events nicht
- * ausgeloest wurden.
+ * Geplante Aufgabe: entfernt regelmaessig Einschreibungen von Personen,
+ * die inzwischen keine Schueler/innen des jeweiligen Hauptkurses mehr
+ * sind. Dient als Sicherheitsnetz, falls durch Massenoperationen
+ * (Bulk-Ausschreibung, Kohorten-Sync, Import) einzelne Events nicht
+ * ausgeloest wurden. Schreibt NIEMANDEN neu ein - das geschieht
+ * ausschliesslich per Klick auf einen Banner.
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -26,7 +27,7 @@ class sync_task extends \core\task\scheduled_task {
     }
 
     /**
-     * Fuehrt den Abgleich fuer alle aktiven Links aus.
+     * Bereinigt fuer alle aktiven Links verwaiste Einschreibungen.
      *
      * @return void
      */
@@ -40,6 +41,6 @@ class sync_task extends \core\task\scheduled_task {
             $count++;
         }
 
-        mtrace("mod_kursmodule: {$count} aktive Links abgeglichen.");
+        mtrace("mod_kursmodule: {$count} aktive Links bereinigt.");
     }
 }

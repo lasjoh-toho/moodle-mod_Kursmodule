@@ -7,10 +7,14 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Verwaltet die Kursverknuepfungs-Banner (kursmodule_link) einer
- * Kursmodule-Instanz und haelt die Einschreibungen in den verlinkten
- * Unterkursen dauerhaft synchron zur Mitgliedschaft (Rolle "Schueler/in")
- * im Hauptkurs: ein Link ist ab dem Anlegen aktiv und bleibt es, bis er im
- * Modul deaktiviert oder entfernt wird (dann automatische Aus-Schreibung).
+ * Kursmodule-Instanz. Die Einschreibung in einen verlinkten Unterkurs
+ * erfolgt bewusst NICHT mehr automatisch fuer alle Schueler/innen auf
+ * einmal, sondern erst im Moment, in dem eine Person tatsaechlich auf den
+ * jeweiligen Banner klickt (siehe go.php / handle_click()) - dadurch
+ * landen nur Lernende, die einen Kurs auch wirklich besuchen, dort auch
+ * als eingeschrieben. Einmal erzeugt, bleibt die Einschreibung dauerhaft
+ * bestehen, bis der Link deaktiviert/entfernt wird oder die Person den
+ * Hauptkurs verlaesst (dann automatische Aus-Schreibung).
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -45,8 +49,8 @@ class link_manager {
     }
 
     /**
-     * Legt einen neuen Kursverknuepfungs-Link an und schreibt sofort alle
-     * aktuellen Schueler/innen des Hauptkurses in den Zielkurs ein.
+     * Legt einen neuen Kursverknuepfungs-Link an. Es wird bewusst NIEMAND
+     * sofort eingeschrieben - das passiert erst per Klick (handle_click()).
      *
      * @param int $kursmoduleid
      * @param int $courseid Zielkurs (Unterkurs)
@@ -73,18 +77,15 @@ class link_manager {
         $record->timecreated = time();
         $record->timemodified = $record->timecreated;
 
-        $linkid = $DB->insert_record('kursmodule_link', $record);
-        $record->id = $linkid;
-
-        self::sync_link($record);
-
-        return $linkid;
+        return $DB->insert_record('kursmodule_link', $record);
     }
 
     /**
-     * Aktualisiert einen Link. Reagiert automatisch auf Rollenwechsel,
-     * Aktivierung/Deaktivierung und Zielkurswechsel, indem die
-     * Einschreibungen entsprechend nachgezogen werden.
+     * Aktualisiert einen Link. Eine Deaktivierung oder ein Zielkurswechsel
+     * schreibt betroffene, bereits per Klick eingeschriebene Personen
+     * sofort wieder aus. Eine (Re-)Aktivierung oder ein Rollenwechsel
+     * schreibt dagegen NIEMANDEN proaktiv neu ein - das passiert weiterhin
+     * erst wieder per Klick (handle_click()).
      *
      * @param int $linkid
      * @param \stdClass $data Felder title, courseid, enrolrole, active (nur gesetzte werden uebernommen)
@@ -125,9 +126,6 @@ class link_manager {
 
         if ($wasactive && !$nowactive) {
             self::unsync_link($link);
-        } else if ($nowactive) {
-            // Deckt sowohl Reaktivierung als auch Rollen-/Zielkurswechsel ab.
-            self::sync_link($link);
         }
     }
 
@@ -199,16 +197,24 @@ class link_manager {
     }
 
     /**
-     * Schreibt alle Schueler/innen des Hauptkurses in den Zielkurs des
-     * Links ein (Vollabgleich, z. B. nach Anlegen/Reaktivieren des Links).
+     * Wird aufgerufen, wenn eine Person tatsaechlich auf einen Banner
+     * klickt (siehe go.php): schreibt sie - sofern sie im Hauptkurs die
+     * Rolle "student" hat - synchron in den Zielkurs des Links ein, bevor
+     * zum Kurs weitergeleitet wird. Lehrende/Verwaltende, die einen Link
+     * nur zum Testen anklicken, werden bewusst NICHT eingeschrieben.
      *
      * @param \stdClass $link
+     * @param int $userid
      * @return void
      */
-    public static function sync_link(\stdClass $link): void {
-        foreach (self::get_student_ids_in_main_course($link->kursmoduleid) as $userid) {
-            enrolment_manager::ensure_enrolled($link, $userid);
+    public static function handle_click(\stdClass $link, int $userid): void {
+        if ((int) $link->active !== 1) {
+            return;
         }
+        if (!self::is_student_in_course((int) self::get_main_courseid($link->kursmoduleid), $userid)) {
+            return;
+        }
+        enrolment_manager::ensure_enrolled($link, $userid);
     }
 
     /**
@@ -220,30 +226,6 @@ class link_manager {
     public static function unsync_link(\stdClass $link): void {
         foreach (enrolment_manager::get_tracked_users($link->id) as $tracked) {
             enrolment_manager::remove_tracked_enrolment($link->id, (int) $tracked->userid, (int) $link->courseid);
-        }
-    }
-
-    /**
-     * Reagiert auf eine neue Schueler/innen-Einschreibung im Hauptkurs:
-     * schreibt die Person in alle aktiven Links aller Kursmodule-Instanzen
-     * dieses Kurses ein.
-     *
-     * @param int $maincourseid
-     * @param int $userid
-     * @return void
-     */
-    public static function sync_user_join(int $maincourseid, int $userid): void {
-        global $DB;
-
-        if (!self::is_student_in_course($maincourseid, $userid)) {
-            return;
-        }
-
-        $kursmodules = $DB->get_records('kursmodule', ['course' => $maincourseid], '', 'id');
-        foreach ($kursmodules as $kursmodule) {
-            foreach (self::get_links((int) $kursmodule->id, true) as $link) {
-                enrolment_manager::ensure_enrolled($link, $userid);
-            }
         }
     }
 
@@ -267,28 +249,31 @@ class link_manager {
     }
 
     /**
-     * Vollstaendiger Soll/Ist-Abgleich fuer einen aktiven Link: schreibt
-     * fehlende Schueler/innen ein UND entfernt Einschreibungen von
-     * Personen, die inzwischen keine Schueler/innen des Hauptkurses mehr
-     * sind. Dient als Sicherheitsnetz fuer die geplante Aufgabe, falls
-     * einzelne Events verpasst wurden.
+     * Sicherheitsnetz fuer die geplante Aufgabe: entfernt Einschreibungen
+     * von Personen, die inzwischen keine Schueler/innen des Hauptkurses
+     * mehr sind (z. B. weil ein Ausschreibe-Event verpasst wurde). Schreibt
+     * bewusst NIEMANDEN neu ein - das passiert ausschliesslich per Klick.
      *
      * @param \stdClass $link
      * @return void
      */
     public static function reconcile_link(\stdClass $link): void {
-        $shouldids = self::get_student_ids_in_main_course($link->kursmoduleid);
-        $shouldidsflip = array_flip($shouldids);
-
-        foreach ($shouldids as $userid) {
-            enrolment_manager::ensure_enrolled($link, $userid);
-        }
+        $shouldidsflip = array_flip(self::get_student_ids_in_main_course($link->kursmoduleid));
 
         foreach (enrolment_manager::get_tracked_users($link->id) as $tracked) {
             if (!isset($shouldidsflip[(int) $tracked->userid])) {
                 enrolment_manager::remove_tracked_enrolment($link->id, (int) $tracked->userid, (int) $link->courseid);
             }
         }
+    }
+
+    /**
+     * @param int $kursmoduleid
+     * @return int
+     */
+    private static function get_main_courseid(int $kursmoduleid): int {
+        global $DB;
+        return (int) $DB->get_field('kursmodule', 'course', ['id' => $kursmoduleid], MUST_EXIST);
     }
 
     /**

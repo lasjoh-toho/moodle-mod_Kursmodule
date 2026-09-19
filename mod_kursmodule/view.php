@@ -104,7 +104,8 @@ foreach ($links as $link) {
     // Ohne eigenes Banner-Bild wird stattdessen ein einfacher Platzhalter
     // mit dem Anfangsbuchstaben des Kursnamens gezeigt.
 
-    $courseurl = new moodle_url('/course/view.php', ['id' => $targetcourse->id]);
+    // Fuehrt ueber go.php: dort wird erst im Moment des Klicks eingeschrieben.
+    $courseurl = new moodle_url('/mod/kursmodule/go.php', ['id' => $id, 'linkid' => $link->id]);
     $rowclass = 'kursmodule-banner';
     $rowclass .= $link->iscurrent ? ' kursmodule-banner-current' : ' kursmodule-banner-dim';
 

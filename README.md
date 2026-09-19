@@ -1,10 +1,13 @@
 # moodle-mod_Kursmodule
 
 Moodle-Aktivität **Kursmodule**: verlinkt mehrere Kurse als sortierbare
-Banner (Bild + Titel), schreibt Schüler/innen automatisch in die
-verlinkten Kurse ein (Rolle pro Link wählbar: *Teilnehmer/in* oder
-*Gast*) und hält diese Einschreibung dauerhaft synchron zur
-Kursmitgliedschaft im Hauptkurs. Ein Link kann als "aktuell" markiert
+Banner (Bild + Titel). Ein Klick auf einen Banner schreibt die Person
+(sofern sie im Hauptkurs "Schüler/in" ist) im selben Moment in den
+verlinkten Kurs ein (Rolle pro Link wählbar: *Teilnehmer/in* oder
+*Gast*) und leitet direkt dorthin weiter - eingeschrieben wird also nur,
+wer einen Kurs auch tatsächlich besucht. Einmal erzeugt, bleibt die
+Einschreibung bestehen, bis der Link deaktiviert/entfernt wird oder die
+Person den Hauptkurs verlässt. Ein Link kann als "aktuell" markiert
 werden (Glow-Hervorhebung), die übrigen bleiben sichtbar abgedunkelt,
 aber weiterhin voll funktionsfähig. Für Lehrende gibt es einen eigenen
 Bewertungs-Tab mit Gesamtnoten-Matrix, aufklappbaren Einzelbewertungen
@@ -43,17 +46,21 @@ Einschreibungen nutzen - beim Entfernen eines Links wird garantiert
   `kursmodule_link`), jeder verweist auf einen Zielkurs mit optionalem
   eigenem Titel/Bild, einer Rolle (`student`/`guest`) und einem
   Aktiv-Status.
-- Sobald ein Link aktiv ist, werden **alle aktuell im Hauptkurs als
-  "Schüler/in" eingeschriebenen Personen** automatisch in den Zielkurs
-  eingeschrieben (`classes/link_manager.php`).
+- Ein Klick auf einen aktiven Banner führt über `go.php`, das - sofern
+  die Person im Hauptkurs "Schüler/in" ist - synchron
+  `link_manager::handle_click()` aufruft und danach in den Zielkurs
+  weiterleitet. Lehrende/Verwaltende, die einen Link nur ansehen, werden
+  dabei bewusst **nicht** eingeschrieben.
 - Event-Beobachter (`classes/observer.php`, `db/events.php`) reagieren
-  auf neue/entfernte Einschreibungen und Rollenänderungen im Hauptkurs
-  und schreiben betroffene Personen sofort in alle aktiven Links ein
-  bzw. wieder aus.
+  ausschließlich auf **Verlassen** des Hauptkurses bzw. Verlust der
+  "student"-Rolle dort und schreiben die Person dann sofort aus allen
+  darüber verwalteten Einschreibungen aus. Es gibt bewusst keine
+  Beobachter, die proaktiv einschreiben.
 - Eine geplante Aufgabe (`classes/task/sync_task.php`, alle 30 Minuten)
-  gleicht zusätzlich alle aktiven Links vollständig ab - ein
-  Sicherheitsnetz für Massenoperationen (Kohorten-Sync, Bulk-Import),
-  bei denen einzelne Events ausbleiben könnten.
+  entfernt zusätzlich verwaiste Einschreibungen (Personen, die inzwischen
+  keine Schüler/innen des Hauptkurses mehr sind) - ein Sicherheitsnetz für
+  Massenoperationen (Kohorten-Sync, Bulk-Ausschreibung), bei denen
+  einzelne Events ausbleiben könnten. Sie schreibt niemanden neu ein.
 - Wird ein Link deaktiviert oder gelöscht, werden alle darüber
   erzeugten Einschreibungen automatisch wieder entfernt
   (`enrolment_manager::remove_tracked_enrolment()`), Einschreibungen
@@ -78,13 +85,11 @@ Einschreibungen nutzen - beim Entfernen eines Links wird garantiert
   unterschiedlicher Rolle, gewinnt beim Entfernen des ersten Links die
   vom zweiten Link zuletzt gesetzte Rolle nicht automatisch neu - ein
   seltener Randfall, der für v1 bewusst einfach gehalten wurde.
-- **Verkettung möglich:** Wenn ein Zielkurs selbst wieder eine
-  Kursmodule-Aktivität mit eigenen aktiven Links enthält, lösen die dort
-  automatisch erzeugten Einschreibungen/Rollenzuweisungen dieselben
-  Events aus und schreiben Lernende transitiv auch in die *dortigen*
-  Verknüpfungen ein. Das kann gewünscht sein (mehrstufige Kursketten),
-  sollte bei verschachtelten Kursstrukturen aber bewusst eingesetzt
-  werden, um keine unerwartet langen Einschreibeketten zu erzeugen.
+- Da die Einschreibung erst per Klick entsteht, zeigt die
+  Bewertungsübersicht für einen Kurs, den noch niemand angeklickt hat,
+  naturgemäß noch keine Daten - die Zeilen der Matrix basieren aber
+  weiterhin auf allen Schüler/innen des Hauptkurses, unabhängig vom
+  Klick-Status.
 
 ## Lizenz
 
