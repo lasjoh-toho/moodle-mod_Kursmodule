@@ -66,6 +66,14 @@ einfacher, hat aber eine Kehrseite:
   beschränkt (Moodle-Standardverhalten bei Rollenzuweisungen) - ein
   über Kursmodule zugewiesenes "Gast"/"Teilnehmer/in" gilt nie in einem
   anderen Kurs.
+- Auf der Verwaltungsseite gibt es einen persönlichen Zwischenspeicher:
+  "Einstellungen in den Speicher kopieren" übernimmt Zielkurs, Titel,
+  Rolle und Aktiv-Status aller Links der aktuellen Instanz; "Module aus
+  dem Speicher einfügen" trägt sie in eine (auch ganz andere) Instanz
+  ein. Der Speicher gehört der Person, nicht dem Kurs - so lässt sich
+  derselbe Satz Verknüpfungen bequem in mehreren parallelen Instanzen
+  wiederverwenden, ohne jede einzeln neu anzulegen. Banner-Bilder werden
+  dabei bewusst nicht mitkopiert.
 
 ## Bekannte Einschränkungen
 

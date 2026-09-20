@@ -54,6 +54,13 @@ $string['linkdeleted'] = 'Course link removed.';
 $string['reordersaved'] = 'Order saved.';
 $string['currentset'] = 'Marked as the current course.';
 
+$string['copytoclipboard'] = 'Copy settings to clipboard';
+$string['pastefromclipboard'] = 'Paste links from clipboard';
+$string['clipboardcopied'] = '{$a} course link(s) copied to your clipboard. The clipboard is personal to you and works across all Kursmodule activities, even in other courses.';
+$string['clipboardempty'] = 'The clipboard is empty. Copy the links of another Kursmodule activity first.';
+$string['clipboardpasted'] = '{$a->added} of {$a->total} course link(s) pasted.';
+$string['clipboardpastedskipped'] = '{$a->added} of {$a->total} course link(s) pasted, {$a->skipped} skipped (target course deleted or identical to this activity\'s main course).';
+
 $string['errorcourseinvalid'] = 'Please choose a valid course.';
 $string['errorcoursealreadylinked'] = 'This course is already linked.';
 

@@ -54,6 +54,13 @@ $string['linkdeleted'] = 'Kursverknüpfung wurde entfernt.';
 $string['reordersaved'] = 'Reihenfolge gespeichert.';
 $string['currentset'] = 'Als aktueller Kurs markiert.';
 
+$string['copytoclipboard'] = 'Einstellungen in den Speicher kopieren';
+$string['pastefromclipboard'] = 'Module aus dem Speicher einfügen';
+$string['clipboardcopied'] = '{$a} Kursverknüpfung(en) in den Speicher kopiert. Der Speicher gehört Ihnen persönlich und gilt für alle Kursmodule-Aktivitäten, auch in anderen Kursen.';
+$string['clipboardempty'] = 'Der Speicher ist leer. Kopieren Sie zuerst die Verknüpfungen einer anderen Kursmodule-Aktivität.';
+$string['clipboardpasted'] = '{$a->added} von {$a->total} Kursverknüpfung(en) eingefügt.';
+$string['clipboardpastedskipped'] = '{$a->added} von {$a->total} Kursverknüpfung(en) eingefügt, {$a->skipped} übersprungen (Zielkurs gelöscht oder identisch mit dem Hauptkurs dieser Aktivität).';
+
 $string['errorcourseinvalid'] = 'Bitte wählen Sie einen gültigen Kurs aus.';
 $string['errorcoursealreadylinked'] = 'Dieser Kurs ist bereits verknüpft.';
 

@@ -65,6 +65,29 @@ if ($action === 'setcurrent' && $linkid) {
     redirect($pageurl, get_string('currentset', 'mod_kursmodule'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
+// Einstellungen (Zielkurs, Titel, Rolle, Aktiv-Status) aller Links dieser
+// Instanz in den persoenlichen Zwischenspeicher kopieren - gilt fuer die
+// eingeloggte Person, nicht fuer diesen Kurs, damit er beim Wechsel in
+// eine andere (auch fremde) Kursmodule-Instanz erhalten bleibt.
+if ($action === 'copytoclipboard') {
+    require_sesskey();
+    $copied = link_manager::copy_to_clipboard($kursmodule->id);
+    redirect($pageurl, get_string('clipboardcopied', 'mod_kursmodule', $copied), null, \core\output\notification::NOTIFY_SUCCESS);
+}
+
+// Links aus dem Zwischenspeicher in diese Instanz einfuegen.
+if ($action === 'pastefromclipboard') {
+    require_sesskey();
+    $result = link_manager::paste_from_clipboard($kursmodule->id, $course->id);
+    if ($result['total'] === 0) {
+        redirect($pageurl, get_string('clipboardempty', 'mod_kursmodule'), null, \core\output\notification::NOTIFY_WARNING);
+    } else if ($result['skipped'] > 0) {
+        redirect($pageurl, get_string('clipboardpastedskipped', 'mod_kursmodule', (object) $result), null, \core\output\notification::NOTIFY_SUCCESS);
+    } else {
+        redirect($pageurl, get_string('clipboardpasted', 'mod_kursmodule', (object) $result), null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+}
+
 // Formular fuer Anlegen/Bearbeiten.
 $editingid = 0;
 if ($action === 'edit' && $linkid) {
@@ -246,5 +269,20 @@ if (empty($links)) {
     }
     echo html_writer::end_tag('ul');
 }
+
+// Zwischenspeicher-Aktionen: erspart das manuelle Neuanlegen derselben
+// Verknuepfungen in vielen (z. B. parallelen) Kursmodule-Instanzen.
+echo html_writer::start_div('kursmodule-clipboard-toolbar mt-3');
+echo html_writer::link(
+    new moodle_url($pageurl, ['action' => 'copytoclipboard', 'sesskey' => sesskey()]),
+    get_string('copytoclipboard', 'mod_kursmodule'),
+    ['class' => 'btn btn-outline-secondary mr-2']
+);
+echo html_writer::link(
+    new moodle_url($pageurl, ['action' => 'pastefromclipboard', 'sesskey' => sesskey()]),
+    get_string('pastefromclipboard', 'mod_kursmodule'),
+    ['class' => 'btn btn-outline-secondary']
+);
+echo html_writer::end_div();
 
 echo $OUTPUT->footer();

@@ -196,6 +196,77 @@ class link_manager {
         $DB->set_field('kursmodule_link', 'iscurrent', 1, ['id' => $linkid, 'kursmoduleid' => $kursmoduleid]);
     }
 
+    /** @var string User-Preference-Schluessel fuer den Verknuepfungs-Zwischenspeicher. */
+    const CLIPBOARD_PREF = 'mod_kursmodule_clipboard';
+
+    /**
+     * Kopiert alle Links einer Instanz (Zielkurs, Titel, Rolle,
+     * Aktiv-Status) in einen persoenlichen Zwischenspeicher
+     * (User-Preference). Der Speicher gehoert bewusst der Person, nicht
+     * dem Kurs, damit er beim Wechsel in eine andere Instanz - auch in
+     * einem ganz anderen Kurs - erhalten bleibt. Banner-Bilder werden
+     * nicht mitkopiert.
+     *
+     * @param int $kursmoduleid
+     * @return int Anzahl kopierter Links
+     */
+    public static function copy_to_clipboard(int $kursmoduleid): int {
+        $links = self::get_links($kursmoduleid);
+
+        $data = [];
+        foreach ($links as $link) {
+            $data[] = [
+                'courseid' => (int) $link->courseid,
+                'title' => $link->title,
+                'enrolrole' => $link->enrolrole,
+                'active' => (int) $link->active,
+            ];
+        }
+
+        set_user_preference(self::CLIPBOARD_PREF, json_encode($data));
+
+        return count($data);
+    }
+
+    /**
+     * Fuegt die im Zwischenspeicher abgelegten Links als neue Links in
+     * eine (in aller Regel andere) Instanz ein. Es wird bewusst NIEMAND
+     * automatisch eingeschrieben - das passiert wie immer erst per Klick.
+     * Links auf inzwischen geloeschte Kurse oder auf den Hauptkurs der
+     * Zielinstanz selbst werden uebersprungen.
+     *
+     * @param int $kursmoduleid Zielinstanz
+     * @param int $excludecourseid Hauptkurs der Zielinstanz (wird nie mitverlinkt)
+     * @return array{added: int, skipped: int, total: int}
+     */
+    public static function paste_from_clipboard(int $kursmoduleid, int $excludecourseid): array {
+        global $DB;
+
+        $raw = get_user_preferences(self::CLIPBOARD_PREF, '');
+        $entries = $raw !== '' ? json_decode($raw, true) : [];
+        $entries = is_array($entries) ? $entries : [];
+
+        $added = 0;
+        foreach ($entries as $entry) {
+            $courseid = (int) ($entry['courseid'] ?? 0);
+            if (!$courseid || $courseid === $excludecourseid || !$DB->record_exists('course', ['id' => $courseid])) {
+                continue;
+            }
+
+            $title = $entry['title'] ?? null;
+            $enrolrole = ($entry['enrolrole'] ?? 'student') === 'guest' ? 'guest' : 'student';
+
+            $newlinkid = self::add_link($kursmoduleid, $courseid, $title, $enrolrole);
+            if (empty($entry['active'])) {
+                self::update_link($newlinkid, (object) ['active' => 0]);
+            }
+            $added++;
+        }
+
+        $total = count($entries);
+        return ['added' => $added, 'skipped' => $total - $added, 'total' => $total];
+    }
+
     /**
      * Wird aufgerufen, wenn eine Person tatsaechlich auf einen Banner
      * klickt (siehe go.php): schreibt sie - sofern sie im Hauptkurs die
