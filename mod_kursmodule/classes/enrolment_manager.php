@@ -6,12 +6,23 @@ namespace mod_kursmodule;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Kapselt saemtliche Ein-/Ausschreibe-Operationen in Zielkursen ueber die
- * isolierte Einschreibemethode enrol_kursmodule. Jede hier erzeugte
- * Einschreibung wird in {kursmodule_enrol} nachverfolgt, damit spaeter
- * garantiert NUR selbst erzeugte Einschreibungen wieder entfernt werden -
- * manuelle Einschreibungen von Lehrenden oder andere Methoden bleiben
- * immer unberuehrt.
+ * Kapselt saemtliche Ein-/Ausschreibe-Operationen in Zielkursen. Nutzt die
+ * "Manuelle Einschreibung" (enrol_manual) jedes Zielkurses - dadurch
+ * braucht Kursmodule kein eigenes zweites Plugin. Jede hier erzeugte
+ * Einschreibung wird in {kursmodule_enrol} nachverfolgt, damit spaeter nur
+ * die selbst erzeugten Einschreibungen wieder entfernt werden.
+ *
+ * WICHTIGE EINSCHRAENKUNG (bewusste Design-Entscheidung): weil die
+ * Einschreibung ueber dieselbe "Manuelle Einschreibung"-Instanz laeuft,
+ * die auch Lehrende im Zielkurs selbst nutzen koennen, kann Moodle NICHT
+ * unterscheiden, ob eine konkrete Rollenzuweisung ueber diesen Weg von
+ * Kursmodule oder manuell von einer Lehrkraft erzeugt wurde. Wird eine
+ * Person, die zusaetzlich manuell in genau denselben Zielkurs
+ * eingetragen wurde, ueber einen Kursmodule-Link wieder entfernt, wird
+ * sie deshalb vollstaendig ausgeschrieben (auch aus der manuellen
+ * Einschreibung). Bei Bedarf einer strikt isolierten, niemals
+ * ueberschneidenden Einschreibung braeuchte es wieder ein eigenes
+ * Einschreibe-Plugin (siehe README).
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -26,27 +37,30 @@ class enrolment_manager {
     private static $guestroleid = null;
 
     /**
-     * Liefert (und erzeugt bei Bedarf) die enrol_kursmodule-Instanz eines
-     * Zielkurses.
+     * Liefert (und aktiviert/erzeugt bei Bedarf) die "Manuelle
+     * Einschreibung"-Instanz eines Zielkurses.
      *
      * @param int $courseid
-     * @return stdClass enrol-Instanzdatensatz
+     * @return \stdClass enrol-Instanzdatensatz
      */
     public static function get_or_create_instance(int $courseid): \stdClass {
         global $DB;
 
-        $instance = $DB->get_record('enrol', ['enrol' => 'kursmodule', 'courseid' => $courseid]);
+        $instance = $DB->get_record('enrol', ['enrol' => 'manual', 'courseid' => $courseid]);
+        $plugin = enrol_get_plugin('manual');
+
         if ($instance) {
             if ($instance->status != ENROL_INSTANCE_ENABLED) {
-                $plugin = enrol_get_plugin('kursmodule');
                 $plugin->update_status($instance, ENROL_INSTANCE_ENABLED);
                 $instance = $DB->get_record('enrol', ['id' => $instance->id]);
             }
             return $instance;
         }
 
+        // Regulaere Kurse haben praktisch immer bereits eine manuelle
+        // Einschreibe-Instanz (wird bei Kursanlage automatisch erzeugt) -
+        // dieser Zweig ist nur ein Sicherheitsnetz fuer den Ausnahmefall.
         $course = get_course($courseid);
-        $plugin = enrol_get_plugin('kursmodule');
         $instanceid = $plugin->add_instance($course, ['status' => ENROL_INSTANCE_ENABLED]);
 
         return $DB->get_record('enrol', ['id' => $instanceid]);
@@ -97,19 +111,22 @@ class enrolment_manager {
         ]);
 
         $instance = self::get_or_create_instance($link->courseid);
-        $plugin = enrol_get_plugin('kursmodule');
+        $plugin = enrol_get_plugin('manual');
 
         if ($tracked) {
             if ((int) $tracked->roleid !== $roleid) {
                 $context = \context_course::instance($link->courseid);
-                role_unassign($tracked->roleid, $userid, $context->id, 'enrol_kursmodule', $instance->id);
-                role_assign($roleid, $userid, $context->id, 'enrol_kursmodule', $instance->id);
+                role_unassign($tracked->roleid, $userid, $context->id, 'enrol_manual', $instance->id);
+                role_assign($roleid, $userid, $context->id, 'enrol_manual', $instance->id);
                 $tracked->roleid = $roleid;
                 $DB->update_record('kursmodule_enrol', $tracked);
             }
             return;
         }
 
+        // enrol_user() ist idempotent: ist die Person bereits (z. B. manuell
+        // von einer Lehrkraft) im Zielkurs eingeschrieben, wird nur die
+        // Rolle ergaenzt statt eine zweite Einschreibung zu erzeugen.
         $plugin->enrol_user($instance, $userid, $roleid);
 
         $record = new \stdClass();
@@ -127,7 +144,8 @@ class enrolment_manager {
      * Person wieder. Die tatsaechliche Einschreibung im Zielkurs wird nur
      * dann vollstaendig aufgehoben, wenn kein anderer aktiver Link
      * (derselben oder einer anderen Kursmodule-Instanz) dieselbe Person
-     * noch im selben Zielkurs benoetigt.
+     * noch im selben Zielkurs benoetigt. Siehe Klassenkommentar zur
+     * Einschraenkung bei parallel bestehender manueller Einschreibung.
      *
      * @param int $linkid
      * @param int $userid
@@ -161,7 +179,7 @@ class enrolment_manager {
         if (!$instance) {
             return;
         }
-        $plugin = enrol_get_plugin('kursmodule');
+        $plugin = enrol_get_plugin('manual');
         $plugin->unenrol_user($instance, $userid);
     }
 

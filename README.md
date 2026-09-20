@@ -13,32 +13,29 @@ aber weiterhin voll funktionsfähig. Für Lehrende gibt es einen eigenen
 Bewertungs-Tab mit Gesamtnoten-Matrix, aufklappbaren Einzelbewertungen
 und Excel-Export.
 
-## Enthaltene Plugins
-
-Dieses Repository enthält **zwei** Moodle-Plugins, die zusammengehören:
-
-| Ordner              | Moodle-Zielverzeichnis     | Zweck                                                                 |
-|----------------------|-----------------------------|------------------------------------------------------------------------|
-| `mod_kursmodule/`    | `mod/kursmodule`            | Die Aktivität selbst (Banner, Verwaltung, Bewertungs-Tab)              |
-| `enrol_kursmodule/`  | `enrol/kursmodule`          | Isolierte, rein programmatisch gesteuerte Einschreibemethode           |
-
-**Beide Ordner müssen installiert werden**, `mod_kursmodule` erklärt
-`enrol_kursmodule` in seiner `version.php` als Abhängigkeit.
-
-Die eigene Einschreibemethode existiert bewusst als separates Plugin:
-dadurch landen automatisch erzeugte Einschreibungen nie in derselben
-"Manuelle Einschreibung"-Instanz, die Lehrende für eigene, unabhängige
-Einschreibungen nutzen - beim Entfernen eines Links wird garantiert
-*ausschließlich* das entfernt, was Kursmodule selbst angelegt hat.
-
 ## Installation
 
-1. `mod_kursmodule/` nach `<moodle>/mod/kursmodule` kopieren.
-2. `enrol_kursmodule/` nach `<moodle>/enrol/kursmodule` kopieren.
-3. Als Admin die Moodle-Update-Seite aufrufen (`admin/index.php`).
-4. Fertig - keine weitere Konfiguration nötig. Die Einschreibemethode
-   `enrol_kursmodule` muss **nicht** manuell in einem Kurs aktiviert
-   werden, sie wird bei Bedarf automatisch pro Zielkurs angelegt.
+Ein einziges Plugin: `mod_kursmodule/` nach `<moodle>/mod/kursmodule`
+kopieren, danach als Admin die Moodle-Update-Seite aufrufen
+(`admin/index.php`). Keine weitere Konfiguration nötig.
+
+Kursmodule nutzt für die Ein-/Ausschreibung die ohnehin in jedem
+Zielkurs vorhandene **"Manuelle Einschreibung"** (`enrol_manual`) - es
+gibt bewusst kein zweites, eigenes Einschreibe-Plugin mehr (das war in
+frühen Versionen anders, siehe unten). Das macht die Installation
+einfacher, hat aber eine Kehrseite:
+
+> **Einschränkung:** Weil dieselbe "Manuelle Einschreibung"-Instanz
+> auch von Lehrenden direkt im Zielkurs genutzt werden kann, kann Moodle
+> nicht unterscheiden, ob eine konkrete Rollenzuweisung über Kursmodule
+> oder manuell entstanden ist. Wird eine Person, die zusätzlich manuell
+> in genau denselben Zielkurs eingetragen wurde, über einen
+> Kursmodule-Link wieder entfernt, wird sie deshalb vollständig
+> ausgeschrieben (auch aus der manuellen Einschreibung). Für die
+> allermeisten Setups - eine Schule, wenige Admins, seltene
+> Überschneidung - ein vertretbarer Kompromiss gegen die einfachere
+> Installation. Wer das nicht will: siehe Git-Historie vor Version
+> 1.3.0, dort gab es ein zweites, isoliertes `enrol_kursmodule`-Plugin.
 
 ## Funktionsweise (Kurzüberblick)
 
@@ -70,7 +67,7 @@ Einschreibungen nutzen - beim Entfernen eines Links wird garantiert
   über Kursmodule zugewiesenes "Gast"/"Teilnehmer/in" gilt nie in einem
   anderen Kurs.
 
-## Bekannte Einschränkungen (v1.0.0)
+## Bekannte Einschränkungen
 
 - Die Kursauswahl in der Verwaltungsseite ist ein einfaches
   durchsuchbares Auswahlfeld über alle Kurse der Instanz - bei sehr
