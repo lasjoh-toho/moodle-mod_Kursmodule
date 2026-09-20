@@ -173,11 +173,17 @@ function kursmodule_get_courseimage_url(int $courseid): ?moodle_url {
     foreach ($files as $file) {
         $mimetype = $file->get_mimetype();
         if ($mimetype && strpos($mimetype, 'image/') === 0) {
+            // Wichtig: itemid muss hier null sein, nicht 0 - genau wie es
+            // Moodle selbst in course_summary_exporter::get_course_image()
+            // macht. Mit einer expliziten 0 baut make_pluginfile_url() ein
+            // zusaetzliches "/0/" in die URL ein, das der Datei-Handler
+            // fuer 'overviewfiles' nicht erwartet - die Datei wurde dadurch
+            // nie gefunden (404/broken image).
             return moodle_url::make_pluginfile_url(
                 $file->get_contextid(),
                 $file->get_component(),
                 $file->get_filearea(),
-                $file->get_itemid(),
+                null,
                 $file->get_filepath(),
                 $file->get_filename()
             );

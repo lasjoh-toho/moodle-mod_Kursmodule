@@ -6,10 +6,20 @@
    wird (kursmodule_cm_info_view()) - dort ist es fuer $PAGE->requires->css()
    bereits zu spaet. Aenderungen hier bitte dort mitpflegen. */
 
+/* Erzwingt einen eigenen Block ueber die volle Breite, damit der
+   "Verwalten"-Button auch dann sauber UNTER der Tabelle landet, wenn das
+   Kursformat die Aktivitaet selbst per flex/inline darstellt. */
+.kursmodule-wrapper {
+    display: block;
+    width: 100%;
+    flex: 1 1 100%;
+}
+
 .kursmodule-table {
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.3);
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 0.5rem;
@@ -20,17 +30,19 @@
     align-items: stretch;
     text-decoration: none;
     color: inherit;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
     background: transparent;
+    transition: background-color 0.12s ease;
 }
 
 .kursmodule-row:last-child {
     border-bottom: none;
 }
 
-.kursmodule-row:hover {
+.kursmodule-row:hover,
+.kursmodule-row:focus-visible {
     text-decoration: none;
-    background: rgba(0, 0, 0, 0.035);
+    background: rgba(47, 111, 235, 0.12);
 }
 
 .kursmodule-row-img {
@@ -41,6 +53,7 @@
     display: block;
     margin: 0;
     padding: 0;
+    border-right: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .kursmodule-row-img-placeholder {
@@ -51,6 +64,7 @@
     font-weight: 600;
     background: #3d3d6b;
     color: #fff;
+    border-right: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .kursmodule-row-info {
@@ -106,7 +120,24 @@
 }
 
 .kursmodule-managebutton {
+    display: block;
+    width: 100%;
+    clear: both;
     margin-top: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .kursmodule-table,
+    .kursmodule-row,
+    .kursmodule-row-img,
+    .kursmodule-row-img-placeholder {
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .kursmodule-row:hover,
+    .kursmodule-row:focus-visible {
+        background: rgba(79, 140, 255, 0.2);
+    }
 }
 
 /* Verwaltungsseite (manage.php) */
