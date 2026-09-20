@@ -86,7 +86,15 @@ if ($showform) {
         file_prepare_draft_area($draftitemid, null, 'mod_kursmodule', 'linkimage', null, ['subdirs' => 0, 'maxfiles' => 1]);
     }
 
-    $form = new \mod_kursmodule\form\link_form(null, [
+    // WICHTIG: moodleform() setzt bei $action = null die Formular-Action auf
+    // die aktuelle URL OHNE Query-String (strip_querystring()). Da "id" nur
+    // per Query-String ankommt (nicht als Hidden-Feld), wuerde required_param
+    // beim Resubmit fehlschlagen. Deshalb hier eine explizite Action-URL mit
+    // "id" (und "action"/"linkid", damit die Seite beim naechsten Aufruf im
+    // richtigen Modus bleibt, falls Validierungsfehler ein erneutes Anzeigen
+    // erfordern).
+    $formaction = new moodle_url($pageurl, ['action' => $action, 'linkid' => $editingid]);
+    $form = new \mod_kursmodule\form\link_form($formaction, [
         'excludecourseid' => $course->id,
         'linkid' => $editingid,
         'cmid' => $cmid,
