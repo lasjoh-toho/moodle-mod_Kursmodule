@@ -120,6 +120,38 @@ function kursmodule_get_coursemodule_info($cm) {
 }
 
 /**
+ * Zeigt die Kursverknuepfungen direkt auf der Kursseite an (unterhalb des
+ * Aktivitaetsnamens), damit Lernende und Trainer/innen sie sehen, ohne die
+ * Aktivitaet erst oeffnen zu muessen. Trainer/innen mit Verwalten-Recht
+ * sehen darunter zusaetzlich einen "Verwalten"-Button.
+ *
+ * @param cm_info $cm
+ * @return void
+ */
+function kursmodule_cm_info_view(cm_info $cm) {
+    global $DB;
+
+    $kursmodule = $DB->get_record('kursmodule', ['id' => $cm->instance]);
+    if (!$kursmodule) {
+        return;
+    }
+
+    $context = context_module::instance($cm->id);
+    $canmanage = has_capability('mod/kursmodule:manage', $context);
+
+    $html = \mod_kursmodule\link_renderer::render_table(
+        (int) $kursmodule->id,
+        $context,
+        $cm->id,
+        true,
+        $canmanage,
+        true
+    );
+
+    $cm->set_content($html, true);
+}
+
+/**
  * Ermittelt die URL des Kursbilds eines Kurses (Dateibereich
  * 'course'/'overviewfiles', itemid 0) - derselbe Mechanismus, den auch
  * die Kurskachel-Ansicht auf dem Dashboard nutzt. Direkter Zugriff auf

@@ -14,8 +14,6 @@
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/mod/kursmodule/lib.php');
 
-use mod_kursmodule\link_manager;
-
 $id = required_param('id', PARAM_INT);
 
 $cm = get_coursemodule_from_id('kursmodule', $id, 0, false, MUST_EXIST);
@@ -73,56 +71,6 @@ if ($cangrades) {
     echo $OUTPUT->tabtree($tabs, 'links');
 }
 
-$links = link_manager::get_links($kursmodule->id, true);
-
-if (empty($links)) {
-    echo $OUTPUT->notification(get_string('viewnolinks', 'mod_kursmodule'), 'info');
-    echo $OUTPUT->footer();
-    exit;
-}
-
-echo html_writer::start_div('kursmodule-banner-list');
-foreach ($links as $link) {
-    $targetcourse = $DB->get_record('course', ['id' => $link->courseid], 'id, fullname, visible');
-    if (!$targetcourse) {
-        continue;
-    }
-
-    $title = $link->title !== null && $link->title !== '' ? $link->title : format_string($targetcourse->fullname);
-
-    $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'mod_kursmodule', 'linkimage', $link->id, 'itemid', false);
-    $imageurl = null;
-    foreach ($files as $file) {
-        $imageurl = moodle_url::make_pluginfile_url(
-            $context->id, 'mod_kursmodule', 'linkimage', $link->id, $file->get_filepath(), $file->get_filename()
-        );
-        break;
-    }
-    if (!$imageurl) {
-        // Kein eigenes Banner-Bild hinterlegt - auf das Kursbild des
-        // Zielkurses zurueckfallen (sofern eines gesetzt ist).
-        $imageurl = kursmodule_get_courseimage_url((int) $targetcourse->id);
-    }
-
-    // Fuehrt ueber go.php: dort wird erst im Moment des Klicks eingeschrieben.
-    $courseurl = new moodle_url('/mod/kursmodule/go.php', ['id' => $id, 'linkid' => $link->id]);
-    $rowclass = 'kursmodule-banner';
-    $rowclass .= $link->iscurrent ? ' kursmodule-banner-current' : ' kursmodule-banner-dim';
-
-    echo html_writer::start_tag('a', ['href' => $courseurl, 'class' => $rowclass]);
-    if ($imageurl) {
-        echo html_writer::empty_tag('img', ['src' => $imageurl, 'class' => 'kursmodule-banner-img', 'alt' => '']);
-    } else {
-        $initial = core_text::strtoupper(core_text::substr(format_string($targetcourse->fullname), 0, 1));
-        echo html_writer::div(s($initial), 'kursmodule-banner-img kursmodule-banner-img-placeholder');
-    }
-    echo html_writer::span(s($title), 'kursmodule-banner-title');
-    if ($link->iscurrent) {
-        echo html_writer::span(get_string('currentbadge', 'mod_kursmodule'), 'kursmodule-banner-badge');
-    }
-    echo html_writer::end_tag('a');
-}
-echo html_writer::end_div();
+echo \mod_kursmodule\link_renderer::render_table($kursmodule->id, $context, $id, true, false);
 
 echo $OUTPUT->footer();

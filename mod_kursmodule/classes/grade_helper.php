@@ -31,10 +31,12 @@ class grade_helper {
 
         foreach ($courseids as $courseid) {
             $result[$courseid] = [];
+            $courseitem = \grade_item::fetch_course_item($courseid);
+
             foreach ($userids as $userid) {
-                $coursegrade = grade_get_course_grade($userid, $courseid);
-                $result[$courseid][$userid] = ($coursegrade && $coursegrade->str_grade !== null)
-                    ? $coursegrade->str_grade
+                $gradegrade = $courseitem ? \grade_grade::fetch(['itemid' => $courseitem->id, 'userid' => $userid]) : null;
+                $result[$courseid][$userid] = ($gradegrade && $gradegrade->finalgrade !== null)
+                    ? grade_format_gradevalue($gradegrade->finalgrade, $courseitem, true)
                     : get_string('gradesnogradeitem', 'mod_kursmodule');
             }
         }

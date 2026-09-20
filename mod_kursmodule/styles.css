@@ -1,88 +1,112 @@
 /* This file is part of Moodle - http://moodle.org/ */
-/* Styles fuer mod_kursmodule: Banner-Leiste (view.php) + Verwaltungsliste (manage.php) */
+/* Styles fuer mod_kursmodule: Verknuepfungstabelle (view.php) + Verwaltungsliste (manage.php) */
+/* Hinweis: dieselben Regeln liegen zusaetzlich inline in
+   classes/link_renderer.php::inline_styles(), damit die Tabelle auch
+   dann korrekt aussieht, wenn sie direkt auf der Kursseite eingebunden
+   wird (kursmodule_cm_info_view()) - dort ist es fuer $PAGE->requires->css()
+   bereits zu spaet. Aenderungen hier bitte dort mitpflegen. */
 
-.kursmodule-banner-list {
+.kursmodule-table {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
 }
 
-.kursmodule-banner {
+.kursmodule-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px 8px 8px;
-    border-radius: 999px;
+    align-items: stretch;
     text-decoration: none;
     color: inherit;
-    background: #2b2d33;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-    position: relative;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    background: transparent;
 }
 
-.kursmodule-banner:hover {
+.kursmodule-row:last-child {
+    border-bottom: none;
+}
+
+.kursmodule-row:hover {
     text-decoration: none;
-    transform: translateY(-1px);
+    background: rgba(0, 0, 0, 0.035);
 }
 
-.kursmodule-banner-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.kursmodule-row-img {
+    width: 120px;
+    height: 68px;
     object-fit: cover;
     flex-shrink: 0;
+    display: block;
+    margin: 0;
+    padding: 0;
 }
 
-.kursmodule-banner-img-placeholder {
-    display: flex;
+.kursmodule-row-img-placeholder {
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    display: flex;
+    font-size: 1.4em;
     font-weight: 600;
+    background: #3d3d6b;
+    color: #fff;
 }
 
-.kursmodule-banner-title {
-    color: #fff;
-    font-weight: 500;
+.kursmodule-row-info {
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.kursmodule-row-title {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.kursmodule-banner-badge {
-    font-size: 0.7em;
+.kursmodule-row-meta {
+    font-size: 0.85em;
+    opacity: 0.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kursmodule-row-badge {
+    align-self: center;
+    margin-right: 14px;
+    font-size: 0.75em;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-
-/* Der aktuelle Kurs: kraeftiger Glow, klar hervorgehoben. */
-.kursmodule-banner-current {
     background: #2f6feb;
-    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.5), 0 0 18px 4px rgba(79, 140, 255, 0.65);
+    color: #fff;
+    border-radius: 10px;
+    padding: 2px 10px;
+    white-space: nowrap;
 }
 
-.kursmodule-banner-current:hover {
-    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.65), 0 0 26px 6px rgba(79, 140, 255, 0.85);
+/* Der aktuelle Kurs: klar hervorgehoben. */
+.kursmodule-row-current {
+    box-shadow: inset 0 0 0 2px rgba(79, 140, 255, 0.65);
 }
 
 /* Die uebrigen Verknuepfungen: sichtbar dunkler, aber weiterhin klar
    klickbar und funktional - kein reduzierter Kontrast, nur reduzierte
    Helligkeit. */
-.kursmodule-banner-dim {
-    filter: brightness(0.72);
+.kursmodule-row-dim {
+    filter: brightness(0.92);
 }
 
-.kursmodule-banner-dim:hover {
-    filter: brightness(0.9);
+.kursmodule-row-hidden {
+    opacity: 0.6;
 }
 
-@media (prefers-color-scheme: dark) {
-    .kursmodule-banner {
-        background: #1c1e24;
-    }
+.kursmodule-managebutton {
+    margin-top: 0.5rem;
 }
 
 /* Verwaltungsseite (manage.php) */

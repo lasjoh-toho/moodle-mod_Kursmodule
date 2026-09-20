@@ -34,7 +34,10 @@ class link_form extends \moodleform {
             'fullname ASC',
             'id, fullname, shortname'
         );
-        $options = [];
+        // Leere Option voranstellen: ohne sie waehlt ein natives <select> immer
+        // den ersten Eintrag automatisch vor, das Feld war dadurch beim
+        // Anlegen eines neuen Links nie wirklich leer.
+        $options = ['' => get_string('searchcourse', 'mod_kursmodule')];
         foreach ($courses as $course) {
             $options[$course->id] = format_string($course->fullname) . ' (' . $course->shortname . ')';
         }
