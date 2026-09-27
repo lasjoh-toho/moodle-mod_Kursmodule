@@ -64,6 +64,20 @@ $string['clipboardpastedskipped'] = '{$a->added} von {$a->total} Kursverknüpfun
 $string['errorcourseinvalid'] = 'Bitte wählen Sie einen gültigen Kurs aus.';
 $string['errorcoursealreadylinked'] = 'Dieser Kurs ist bereits verknüpft.';
 
+$string['coursefilterheader'] = 'Kursauswahl einschränken';
+$string['filterteacher'] = 'Nur Kurse zeigen, in denen ich mindestens als Trainer/in ohne Bearbeitungsrecht eingeschrieben bin';
+$string['filterfield'] = 'Nur Kurse zeigen, bei denen das Feld „{$a}“ mit dem Hauptkurs dieser Aktivität übereinstimmt';
+$string['applyfilter'] = 'Filter anwenden';
+
+$string['settings_coursefilters'] = 'Kursauswahl-Filter';
+$string['settings_coursefilters_desc'] = 'Legt fest, welche Filter-Checkboxen Trainer/innen beim Anlegen oder Bearbeiten einer Kursverknüpfung zur Verfügung stehen, um die Liste der verlinkbaren Kurse selbst einzuschränken.';
+$string['settings_enableteacherfilter'] = 'Filter „Nur eigene Trainer-Kurse“ anbieten';
+$string['settings_enableteacherfilter_desc'] = 'Blendet im Verknüpfungsformular eine Checkbox ein, mit der Trainer/innen die Kursliste auf Kurse einschränken können, in denen sie selbst mindestens als Trainer/in ohne Bearbeitungsrecht eingeschrieben sind.';
+$string['settings_enablefieldfilter'] = 'Filter „Übereinstimmendes Kurs-Zusatzfeld“ anbieten';
+$string['settings_enablefieldfilter_desc'] = 'Blendet im Verknüpfungsformular eine Checkbox ein, mit der Trainer/innen die Kursliste auf Kurse einschränken können, deren unten angegebenes Zusatzfeld denselben Wert hat wie der Hauptkurs dieser Aktivität. Benötigt den Kurznamen eines Kurs-Zusatzfeldes (siehe unten).';
+$string['settings_fieldfiltershortname'] = 'Kurzname des Kurs-Zusatzfeldes';
+$string['settings_fieldfiltershortname_desc'] = 'Der Kurzname (nicht der Anzeigename) eines unter Website-Administration → Kurse → Kurs-Standardeinstellungen → Kurs-Zusatzfelder angelegten Feldes, z. B. "kohorte" oder "jahrgang". Funktioniert zuverlässig für Text- und Auswahl-Felder. Ohne Eintrag bleibt der Filter auch bei aktivierter Checkbox oben wirkungslos.';
+
 $string['nolinksyet'] = 'Es sind noch keine Kursverknüpfungen angelegt.';
 $string['viewnolinks'] = 'Für diese Aktivität wurden noch keine Kursverknüpfungen angelegt.';
 

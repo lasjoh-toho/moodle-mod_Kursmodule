@@ -74,6 +74,15 @@ einfacher, hat aber eine Kehrseite:
   derselbe Satz Verknüpfungen bequem in mehreren parallelen Instanzen
   wiederverwenden, ohne jede einzeln neu anzulegen. Banner-Bilder werden
   dabei bewusst nicht mitkopiert.
+- Ein Admin kann unter *Website-Administration → Module → Aktivitäten →
+  Kursmodule* zwei Filter-Checkboxen freischalten, die dann Trainer/innen
+  im Verknüpfungsformular selbst an- und abwählen können, um die
+  Kursauswahl einzuschränken: "Nur eigene Trainer-Kurse" (Kurse, in
+  denen die Person mindestens als Trainer/in ohne Bearbeitungsrecht
+  eingeschrieben ist) und "Übereinstimmendes Kurs-Zusatzfeld" (nur Kurse,
+  deren angegebenes Kurs-Zusatzfeld denselben Wert hat wie der Hauptkurs
+  der Aktivität - Kurzname des Feldes wird in den Einstellungen
+  hinterlegt). Beide Filter sind standardmäßig deaktiviert.
 
 ## Bekannte Einschränkungen
 

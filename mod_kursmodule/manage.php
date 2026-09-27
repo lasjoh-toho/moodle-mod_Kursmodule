@@ -121,6 +121,7 @@ if ($showform) {
         'excludecourseid' => $course->id,
         'linkid' => $editingid,
         'cmid' => $cmid,
+        'currentcourseid' => $existinglink ? (int) $existinglink->courseid : 0,
     ]);
 
     $formdefaults = ['cmid' => $cmid, 'linkid' => $editingid, 'imagefile' => $draftitemid];
