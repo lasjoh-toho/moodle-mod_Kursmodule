@@ -2,10 +2,11 @@
 // This file is part of Moodle - http://moodle.org/
 
 /**
- * Admin-Einstellungen fuer mod_kursmodule: schaltet die Kurs-Filter-
- * Checkboxen im Verknuepfungsformular (classes/form/link_form.php) frei,
- * die Trainer/innen dann selbst pro Verknuepfung an- und abwaehlen
- * koennen, um die Kursauswahl einzuschraenken.
+ * Admin-Einstellungen fuer mod_kursmodule: legt fest, welche Kurse
+ * Trainer/innen ueberhaupt verlinken duerfen (classes/course_filter.php).
+ * Die Einschraenkungen sind fuer Trainer/innen nicht abschaltbar - nur
+ * Admins koennen sie hier konfigurieren. Website-Admins selbst sind von
+ * beiden Einschraenkungen immer ausgenommen.
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -22,9 +23,16 @@ if ($ADMIN->fulltree) {
     ));
 
     $settings->add(new admin_setting_configcheckbox(
-        'mod_kursmodule/enableteacherfilter',
-        get_string('settings_enableteacherfilter', 'mod_kursmodule'),
-        get_string('settings_enableteacherfilter_desc', 'mod_kursmodule'),
+        'mod_kursmodule/restrictroleediting',
+        get_string('settings_restrictroleediting', 'mod_kursmodule'),
+        get_string('settings_restrictroleediting_desc', 'mod_kursmodule'),
+        0
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'mod_kursmodule/restrictroleteacher',
+        get_string('settings_restrictroleteacher', 'mod_kursmodule'),
+        get_string('settings_restrictroleteacher_desc', 'mod_kursmodule'),
         0
     ));
 

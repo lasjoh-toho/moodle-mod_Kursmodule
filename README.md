@@ -74,15 +74,22 @@ einfacher, hat aber eine Kehrseite:
   derselbe Satz Verknüpfungen bequem in mehreren parallelen Instanzen
   wiederverwenden, ohne jede einzeln neu anzulegen. Banner-Bilder werden
   dabei bewusst nicht mitkopiert.
-- Ein Admin kann unter *Website-Administration → Module → Aktivitäten →
-  Kursmodule* zwei Filter-Checkboxen freischalten, die dann Trainer/innen
-  im Verknüpfungsformular selbst an- und abwählen können, um die
-  Kursauswahl einzuschränken: "Nur eigene Trainer-Kurse" (Kurse, in
-  denen die Person mindestens als Trainer/in ohne Bearbeitungsrecht
-  eingeschrieben ist) und "Übereinstimmendes Kurs-Zusatzfeld" (nur Kurse,
-  deren angegebenes Kurs-Zusatzfeld denselben Wert hat wie der Hauptkurs
-  der Aktivität - Kurzname des Feldes wird in den Einstellungen
-  hinterlegt). Beide Filter sind standardmäßig deaktiviert.
+- Unter *Website-Administration → Module → Aktivitäten → Kursmodule*
+  können Admins einschränken, welche Kurse Trainer/innen überhaupt
+  verlinken dürfen - für Trainer/innen nicht abschaltbar, es gibt dafür
+  bewusst keine Checkbox im Verknüpfungsformular. Zwei unabhängige
+  Einschränkungen: (1) Rollen-Checkboxen "mit Bearbeitungsrecht" /
+  "ohne Bearbeitungsrecht" - ist mindestens eine aktiviert, dürfen
+  Trainer/innen nur noch Kurse verlinken, in denen sie selbst eine der
+  aktivierten Rollen innehaben; sind beide deaktiviert, gilt keine
+  Rollen-Einschränkung. (2) "Übereinstimmendes Kurs-Zusatzfeld" - nur
+  Kurse, deren per Kurzname angegebenes Kurs-Zusatzfeld denselben Wert
+  hat wie der Hauptkurs der Aktivität, z. B. um in einem System mit
+  vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Beide
+  Einschränkungen sind serverseitig erzwungen (nicht nur in der
+  Dropdown-Liste) und gelten nicht für Website-Admins selbst. Ohne
+  Konfiguration (Standardzustand) bleibt das Verhalten wie zuvor,
+  keine Einschränkung.
 
 ## Bekannte Einschränkungen
 

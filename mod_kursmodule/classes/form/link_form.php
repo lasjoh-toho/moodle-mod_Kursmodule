@@ -33,35 +33,6 @@ class link_form extends \moodleform {
         $mform->addElement('hidden', 'linkid', $linkid);
         $mform->setType('linkid', PARAM_INT);
 
-        // Kurs-Filter-Checkboxen: nur sichtbar, wenn ein Admin sie in den
-        // Plugin-Einstellungen freigeschaltet hat. Ueber den No-Submit-
-        // Button "Anwenden" wird das Formular ohne Validierung neu
-        // aufgebaut (Standard-Moodle-Muster fuer dynamische Auswahllisten) -
-        // die aktuellen Haken werden deshalb per optional_param() aus dem
-        // POST gelesen, nicht ueber $mform selbst.
-        $enableteacherfilter = (bool) get_config('mod_kursmodule', 'enableteacherfilter');
-        $fieldshortname = trim((string) get_config('mod_kursmodule', 'fieldfiltershortname'));
-        $enablefieldfilter = (bool) get_config('mod_kursmodule', 'enablefieldfilter') && $fieldshortname !== '';
-
-        if ($enableteacherfilter || $enablefieldfilter) {
-            $mform->addElement('header', 'coursefilterheader', get_string('coursefilterheader', 'mod_kursmodule'));
-            $mform->setExpanded('coursefilterheader', true);
-
-            if ($enableteacherfilter) {
-                $mform->addElement('advcheckbox', 'filterteacher', '', get_string('filterteacher', 'mod_kursmodule'));
-            }
-            if ($enablefieldfilter) {
-                $fielddisplay = \mod_kursmodule\course_filter::get_field_display_name($fieldshortname);
-                $mform->addElement('advcheckbox', 'filterfield', '', get_string('filterfield', 'mod_kursmodule', $fielddisplay));
-            }
-
-            $mform->addElement('submit', 'applyfilter', get_string('applyfilter', 'mod_kursmodule'));
-            $mform->registerNoSubmitButton('applyfilter');
-        }
-
-        $filterteacher = $enableteacherfilter && optional_param('filterteacher', 0, PARAM_BOOL);
-        $filterfield = $enablefieldfilter && optional_param('filterfield', 0, PARAM_BOOL);
-
         $courses = $DB->get_records_select(
             'course',
             'id <> 1 AND id <> ?',
@@ -70,36 +41,11 @@ class link_form extends \moodleform {
             'id, fullname, shortname'
         );
 
-        if ($filterteacher) {
-            $allowed = array_flip(\mod_kursmodule\course_filter::get_teacher_courseids($USER->id));
-            foreach (array_keys($courses) as $cid) {
-                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
-                    unset($courses[$cid]);
-                }
-            }
-        }
-
-        if ($filterfield) {
-            $mainvalue = \mod_kursmodule\course_filter::get_custom_field_value($excludecourseid, $fieldshortname);
-            $allowed = $mainvalue !== null
-                ? array_flip(\mod_kursmodule\course_filter::get_courseids_with_field_value($fieldshortname, $mainvalue))
-                : [];
-            foreach (array_keys($courses) as $cid) {
-                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
-                    unset($courses[$cid]);
-                }
-            }
-        }
-
-        // Beim Bearbeiten bleibt der aktuell verlinkte Kurs immer waehlbar,
-        // auch wenn ein Filter ihn eigentlich herausfiltern wuerde - sonst
-        // wuerde ein Speichern ungewollt den Zielkurs aendern.
-        if ($currentcourseid && !isset($courses[$currentcourseid])) {
-            $currentcourse = $DB->get_record('course', ['id' => $currentcourseid], 'id, fullname, shortname');
-            if ($currentcourse) {
-                $courses[$currentcourseid] = $currentcourse;
-            }
-        }
+        // Von Admins festgelegte Einschraenkungen, welche Kurse ueberhaupt
+        // verlinkt werden duerfen (siehe settings.php) - nicht optional
+        // fuer Trainer/innen, daher hier ohne Checkbox automatisch
+        // angewendet. Website-Admins sind ausgenommen (course_filter::apply_restrictions()).
+        $courses = \mod_kursmodule\course_filter::apply_restrictions($courses, $excludecourseid, $currentcourseid, (int) $USER->id);
 
         // Leere Option voranstellen: ohne sie waehlt ein natives <select> immer
         // den ersten Eintrag automatisch vor, das Feld war dadurch beim
@@ -147,12 +93,33 @@ class link_form extends \moodleform {
      * @return array
      */
     public function validation($data, $files) {
-        global $DB;
+        global $DB, $USER;
 
         $errors = parent::validation($data, $files);
 
-        if (empty($data['courseid']) || !$DB->record_exists('course', ['id' => $data['courseid']])) {
+        $courseid = (int) ($data['courseid'] ?? 0);
+        if (empty($courseid) || !$DB->record_exists('course', ['id' => $courseid])) {
             $errors['courseid'] = get_string('errorcourseinvalid', 'mod_kursmodule');
+            return $errors;
+        }
+
+        // Serverseitig dieselbe Einschraenkung wie in definition() erzwingen -
+        // die gefilterte Auswahlliste allein waere keine echte Sicherung
+        // gegen eine manuell zusammengebaute Anfrage.
+        $excludecourseid = $this->_customdata['excludecourseid'] ?? 0;
+        $currentcourseid = (int) ($this->_customdata['currentcourseid'] ?? 0);
+
+        if ($courseid !== $currentcourseid) {
+            $courserecord = $DB->get_record('course', ['id' => $courseid], 'id, fullname, shortname');
+            $allowed = \mod_kursmodule\course_filter::apply_restrictions(
+                [$courseid => $courserecord],
+                $excludecourseid,
+                $currentcourseid,
+                (int) $USER->id
+            );
+            if (!isset($allowed[$courseid])) {
+                $errors['courseid'] = get_string('errorcoursenotallowed', 'mod_kursmodule');
+            }
         }
 
         return $errors;

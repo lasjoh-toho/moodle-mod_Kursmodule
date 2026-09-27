@@ -64,19 +64,18 @@ $string['clipboardpastedskipped'] = '{$a->added} of {$a->total} course link(s) p
 $string['errorcourseinvalid'] = 'Please choose a valid course.';
 $string['errorcoursealreadylinked'] = 'This course is already linked.';
 
-$string['coursefilterheader'] = 'Narrow down course selection';
-$string['filterteacher'] = 'Only show courses I am enrolled in as at least a non-editing teacher';
-$string['filterfield'] = 'Only show courses whose "{$a}" field matches this activity\'s main course';
-$string['applyfilter'] = 'Apply filter';
+$string['errorcoursenotallowed'] = 'This course is not available to you for linking under the site administration\'s settings.';
 
-$string['settings_coursefilters'] = 'Course selection filters';
-$string['settings_coursefilters_desc'] = 'Controls which filter checkboxes teachers get when adding or editing a course link, letting them narrow down the list of linkable courses themselves.';
-$string['settings_enableteacherfilter'] = 'Offer "my teacher courses only" filter';
-$string['settings_enableteacherfilter_desc'] = 'Shows a checkbox in the link form that lets teachers restrict the course list to courses where they themselves are enrolled as at least a non-editing teacher.';
-$string['settings_enablefieldfilter'] = 'Offer "matching course field" filter';
-$string['settings_enablefieldfilter_desc'] = 'Shows a checkbox in the link form that lets teachers restrict the course list to courses whose custom field (set below) has the same value as this activity\'s main course. Requires the shortname of a course custom field (see below).';
+$string['settings_coursefilters'] = 'Restrict course selection';
+$string['settings_coursefilters_desc'] = 'Controls which courses teachers are allowed to link at all. These restrictions apply automatically and cannot be turned off by teachers - only admins can configure them here. Site admins themselves are always exempt from both restrictions.';
+$string['settings_restrictroleediting'] = 'Allow linking by teachers with editing rights';
+$string['settings_restrictroleediting_desc'] = 'If at least one of the two role checkboxes is enabled, teachers may only link courses where they themselves hold one of the enabled roles. If both are disabled, no role restriction applies (as before).';
+$string['settings_restrictroleteacher'] = 'Allow linking by non-editing teachers';
+$string['settings_restrictroleteacher_desc'] = 'If at least one of the two role checkboxes is enabled, teachers may only link courses where they themselves hold one of the enabled roles. If both are disabled, no role restriction applies (as before).';
+$string['settings_enablefieldfilter'] = 'Only allow courses with a matching course custom field';
+$string['settings_enablefieldfilter_desc'] = 'Automatically restricts linkable courses to those whose custom field (set below) has the same value as the main course of the activity - e.g. to limit selection to one\'s own school in a system with many schools. Cannot be turned off by teachers. Requires the shortname of a course custom field (see below).';
 $string['settings_fieldfiltershortname'] = 'Course custom field shortname';
-$string['settings_fieldfiltershortname_desc'] = 'The shortname (not the display name) of a field created under Site administration → Courses → Course default settings → Course custom fields, e.g. "cohort" or "intake". Works reliably for text and select fields. Leaving this empty makes the filter above ineffective even when enabled.';
+$string['settings_fieldfiltershortname_desc'] = 'The shortname (not the display name) of a field created under Site administration → Courses → Course default settings → Course custom fields, e.g. "school" or "cohort". Works reliably for text and select fields. Leaving this empty makes the filter above ineffective even when enabled.';
 
 $string['nolinksyet'] = 'No course links have been added yet.';
 $string['viewnolinks'] = 'No course links have been set up for this activity yet.';

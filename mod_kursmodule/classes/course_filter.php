@@ -6,10 +6,12 @@ namespace mod_kursmodule;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Hilfsfunktionen fuer die Kurs-Filter-Checkboxen im Verknuepfungsformular
- * (classes/form/link_form.php): welche Kurse darf eine Person ueberhaupt
- * zur Auswahl bekommen. Die Filter selbst werden erst wirksam, wenn sie
- * ueber die Plugin-Einstellungen (settings.php) freigeschaltet sind.
+ * Setzt durch, welche Kurse eine Person ueberhaupt verlinken darf. Die
+ * Einschraenkungen selbst werden ausschliesslich von Admins ueber die
+ * Plugin-Einstellungen (settings.php) festgelegt - Trainer/innen koennen
+ * sie weder einsehen noch abschalten, sie greifen automatisch sowohl in
+ * der Kursauswahl des Formulars (classes/form/link_form.php::definition())
+ * als auch serverseitig bei der Validierung (::validation()).
  *
  * @package     mod_kursmodule
  * @copyright   2026 Jan Johann Peter <lasjohtoho@gmail.com>
@@ -18,25 +20,92 @@ defined('MOODLE_INTERNAL') || die();
 class course_filter {
 
     /**
-     * Kurse, in denen eine Person mindestens als Trainer/in ohne
-     * Bearbeitungsrecht ("teacher") eingeschrieben ist - "mindestens",
-     * weil eine Trainer/in mit Bearbeitungsrecht ("editingteacher")
-     * automatisch mit eingeschlossen ist.
+     * Wendet die von Admins konfigurierten Einschraenkungen auf eine
+     * Liste von Kursen an. Website-Admins (is_siteadmin()) sind davon
+     * immer ausgenommen - die Einschraenkung gilt fuer Trainer/innen,
+     * nicht fuer die Verwaltung des Systems. Der aktuell verlinkte Kurs
+     * bleibt beim Bearbeiten einer bestehenden Verknuepfung immer
+     * erhalten, damit eine spaetere Verschaerfung der Einstellungen kein
+     * Speichern unbeabsichtigt auf einen anderen Zielkurs umbiegt.
      *
+     * @param \stdClass[] $courses Kursdatensaetze, indiziert nach Kurs-ID
+     * @param int $maincourseid Hauptkurs der Kursmodule-Aktivitaet
+     * @param int $currentcourseid aktuell verlinkter Kurs beim Bearbeiten (0 beim Anlegen)
      * @param int $userid
-     * @return int[] Kurs-IDs
+     * @return \stdClass[]
      */
-    public static function get_teacher_courseids(int $userid): array {
+    public static function apply_restrictions(array $courses, int $maincourseid, int $currentcourseid, int $userid): array {
         global $DB;
 
+        if (is_siteadmin($userid)) {
+            return $courses;
+        }
+
+        $allowedarchetypes = [];
+        if ((bool) get_config('mod_kursmodule', 'restrictroleediting')) {
+            $allowedarchetypes[] = 'editingteacher';
+        }
+        if ((bool) get_config('mod_kursmodule', 'restrictroleteacher')) {
+            $allowedarchetypes[] = 'teacher';
+        }
+
+        if (!empty($allowedarchetypes)) {
+            $allowed = array_flip(self::get_courseids_by_roles($userid, $allowedarchetypes));
+            foreach (array_keys($courses) as $cid) {
+                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
+                    unset($courses[$cid]);
+                }
+            }
+        }
+
+        $fieldshortname = trim((string) get_config('mod_kursmodule', 'fieldfiltershortname'));
+        if ((bool) get_config('mod_kursmodule', 'enablefieldfilter') && $fieldshortname !== '') {
+            $mainvalue = self::get_custom_field_value($maincourseid, $fieldshortname);
+            $allowed = $mainvalue !== null
+                ? array_flip(self::get_courseids_with_field_value($fieldshortname, $mainvalue))
+                : [];
+            foreach (array_keys($courses) as $cid) {
+                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
+                    unset($courses[$cid]);
+                }
+            }
+        }
+
+        if ($currentcourseid && !isset($courses[$currentcourseid])) {
+            $currentcourse = $DB->get_record('course', ['id' => $currentcourseid], 'id, fullname, shortname');
+            if ($currentcourse) {
+                $courses[$currentcourseid] = $currentcourse;
+            }
+        }
+
+        return $courses;
+    }
+
+    /**
+     * Kurse, in denen eine Person mindestens eine der angegebenen
+     * Rollen-Archetypen innehat (z. B. 'teacher', 'editingteacher').
+     *
+     * @param int $userid
+     * @param string[] $archetypes
+     * @return int[] Kurs-IDs
+     */
+    public static function get_courseids_by_roles(int $userid, array $archetypes): array {
+        global $DB;
+
+        if (empty($archetypes)) {
+            return [];
+        }
+
+        [$insql, $inparams] = $DB->get_in_or_equal($archetypes, SQL_PARAMS_NAMED, 'arch');
         $sql = "SELECT DISTINCT c.id
                   FROM {role_assignments} ra
                   JOIN {context} ctx ON ctx.id = ra.contextid AND ctx.contextlevel = :contextlevel
                   JOIN {course} c ON c.id = ctx.instanceid
                   JOIN {role} r ON r.id = ra.roleid
-                 WHERE ra.userid = :userid AND r.archetype IN ('teacher', 'editingteacher')";
+                 WHERE ra.userid = :userid AND r.archetype $insql";
+        $params = array_merge(['contextlevel' => CONTEXT_COURSE, 'userid' => $userid], $inparams);
 
-        return array_keys($DB->get_records_sql($sql, ['contextlevel' => CONTEXT_COURSE, 'userid' => $userid]));
+        return array_keys($DB->get_records_sql($sql, $params));
     }
 
     /**

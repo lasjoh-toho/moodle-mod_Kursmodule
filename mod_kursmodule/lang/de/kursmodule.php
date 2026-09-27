@@ -64,19 +64,18 @@ $string['clipboardpastedskipped'] = '{$a->added} von {$a->total} Kursverknüpfun
 $string['errorcourseinvalid'] = 'Bitte wählen Sie einen gültigen Kurs aus.';
 $string['errorcoursealreadylinked'] = 'Dieser Kurs ist bereits verknüpft.';
 
-$string['coursefilterheader'] = 'Kursauswahl einschränken';
-$string['filterteacher'] = 'Nur Kurse zeigen, in denen ich mindestens als Trainer/in ohne Bearbeitungsrecht eingeschrieben bin';
-$string['filterfield'] = 'Nur Kurse zeigen, bei denen das Feld „{$a}“ mit dem Hauptkurs dieser Aktivität übereinstimmt';
-$string['applyfilter'] = 'Filter anwenden';
+$string['errorcoursenotallowed'] = 'Dieser Kurs steht Ihnen laut den Einstellungen der Website-Administration nicht zur Verknüpfung zur Verfügung.';
 
-$string['settings_coursefilters'] = 'Kursauswahl-Filter';
-$string['settings_coursefilters_desc'] = 'Legt fest, welche Filter-Checkboxen Trainer/innen beim Anlegen oder Bearbeiten einer Kursverknüpfung zur Verfügung stehen, um die Liste der verlinkbaren Kurse selbst einzuschränken.';
-$string['settings_enableteacherfilter'] = 'Filter „Nur eigene Trainer-Kurse“ anbieten';
-$string['settings_enableteacherfilter_desc'] = 'Blendet im Verknüpfungsformular eine Checkbox ein, mit der Trainer/innen die Kursliste auf Kurse einschränken können, in denen sie selbst mindestens als Trainer/in ohne Bearbeitungsrecht eingeschrieben sind.';
-$string['settings_enablefieldfilter'] = 'Filter „Übereinstimmendes Kurs-Zusatzfeld“ anbieten';
-$string['settings_enablefieldfilter_desc'] = 'Blendet im Verknüpfungsformular eine Checkbox ein, mit der Trainer/innen die Kursliste auf Kurse einschränken können, deren unten angegebenes Zusatzfeld denselben Wert hat wie der Hauptkurs dieser Aktivität. Benötigt den Kurznamen eines Kurs-Zusatzfeldes (siehe unten).';
+$string['settings_coursefilters'] = 'Kursauswahl einschränken';
+$string['settings_coursefilters_desc'] = 'Legt fest, welche Kurse Trainer/innen überhaupt verknüpfen dürfen. Diese Einschränkungen gelten automatisch und sind für Trainer/innen nicht abschaltbar - nur hier von Admins konfigurierbar. Website-Admins selbst sind von beiden Einschränkungen immer ausgenommen.';
+$string['settings_restrictroleediting'] = 'Verknüpfung durch Trainer/innen mit Bearbeitungsrecht erlauben';
+$string['settings_restrictroleediting_desc'] = 'Ist mindestens eine der beiden Rollen-Checkboxen aktiviert, dürfen Trainer/innen nur noch Kurse verknüpfen, in denen sie selbst eine der aktivierten Rollen innehaben. Sind beide Checkboxen deaktiviert, gilt keine Rollen-Einschränkung (wie bisher).';
+$string['settings_restrictroleteacher'] = 'Verknüpfung durch Trainer/innen ohne Bearbeitungsrecht erlauben';
+$string['settings_restrictroleteacher_desc'] = 'Ist mindestens eine der beiden Rollen-Checkboxen aktiviert, dürfen Trainer/innen nur noch Kurse verknüpfen, in denen sie selbst eine der aktivierten Rollen innehaben. Sind beide Checkboxen deaktiviert, gilt keine Rollen-Einschränkung (wie bisher).';
+$string['settings_enablefieldfilter'] = 'Nur Kurse mit übereinstimmendem Kurs-Zusatzfeld erlauben';
+$string['settings_enablefieldfilter_desc'] = 'Schränkt die verknüpfbaren Kurse automatisch auf solche ein, deren unten angegebenes Zusatzfeld denselben Wert hat wie der Hauptkurs der jeweiligen Aktivität - z. B. um in einem System mit vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Für Trainer/innen nicht abschaltbar. Benötigt den Kurznamen eines Kurs-Zusatzfeldes (siehe unten).';
 $string['settings_fieldfiltershortname'] = 'Kurzname des Kurs-Zusatzfeldes';
-$string['settings_fieldfiltershortname_desc'] = 'Der Kurzname (nicht der Anzeigename) eines unter Website-Administration → Kurse → Kurs-Standardeinstellungen → Kurs-Zusatzfelder angelegten Feldes, z. B. "kohorte" oder "jahrgang". Funktioniert zuverlässig für Text- und Auswahl-Felder. Ohne Eintrag bleibt der Filter auch bei aktivierter Checkbox oben wirkungslos.';
+$string['settings_fieldfiltershortname_desc'] = 'Der Kurzname (nicht der Anzeigename) eines unter Website-Administration → Kurse → Kurs-Standardeinstellungen → Kurs-Zusatzfelder angelegten Feldes, z. B. "schule" oder "kohorte". Funktioniert zuverlässig für Text- und Auswahl-Felder. Ohne Eintrag bleibt der Filter auch bei aktivierter Checkbox oben wirkungslos.';
 
 $string['nolinksyet'] = 'Es sind noch keine Kursverknüpfungen angelegt.';
 $string['viewnolinks'] = 'Für diese Aktivität wurden noch keine Kursverknüpfungen angelegt.';
