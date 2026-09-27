@@ -66,16 +66,17 @@ $string['errorcoursealreadylinked'] = 'Dieser Kurs ist bereits verknüpft.';
 
 $string['errorcoursenotallowed'] = 'Dieser Kurs steht Ihnen laut den Einstellungen der Website-Administration nicht zur Verknüpfung zur Verfügung.';
 
+$string['onlyteacherrole'] = 'Nur Kurse anzeigen, in denen ich Trainer/in bin';
+$string['applyfilter'] = 'Filter anwenden';
+
 $string['settings_coursefilters'] = 'Kursauswahl einschränken';
-$string['settings_coursefilters_desc'] = 'Legt fest, welche Kurse Trainer/innen überhaupt verknüpfen dürfen. Diese Einschränkungen gelten automatisch und sind für Trainer/innen nicht abschaltbar - nur hier von Admins konfigurierbar. Website-Admins selbst sind von beiden Einschränkungen immer ausgenommen.';
-$string['settings_restrictroleediting'] = 'Verknüpfung durch Trainer/innen mit Bearbeitungsrecht erlauben';
-$string['settings_restrictroleediting_desc'] = 'Ist mindestens eine der beiden Rollen-Checkboxen aktiviert, dürfen Trainer/innen nur noch Kurse verknüpfen, in denen sie selbst eine der aktivierten Rollen innehaben. Sind beide Checkboxen deaktiviert, gilt keine Rollen-Einschränkung (wie bisher).';
-$string['settings_restrictroleteacher'] = 'Verknüpfung durch Trainer/innen ohne Bearbeitungsrecht erlauben';
-$string['settings_restrictroleteacher_desc'] = 'Ist mindestens eine der beiden Rollen-Checkboxen aktiviert, dürfen Trainer/innen nur noch Kurse verknüpfen, in denen sie selbst eine der aktivierten Rollen innehaben. Sind beide Checkboxen deaktiviert, gilt keine Rollen-Einschränkung (wie bisher).';
-$string['settings_enablefieldfilter'] = 'Nur Kurse mit übereinstimmendem Kurs-Zusatzfeld erlauben';
-$string['settings_enablefieldfilter_desc'] = 'Schränkt die verknüpfbaren Kurse automatisch auf solche ein, deren unten angegebenes Zusatzfeld denselben Wert hat wie der Hauptkurs der jeweiligen Aktivität - z. B. um in einem System mit vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Für Trainer/innen nicht abschaltbar. Benötigt den Kurznamen eines Kurs-Zusatzfeldes (siehe unten).';
-$string['settings_fieldfiltershortname'] = 'Kurzname des Kurs-Zusatzfeldes';
-$string['settings_fieldfiltershortname_desc'] = 'Der Kurzname (nicht der Anzeigename) eines unter Website-Administration → Kurse → Kurs-Standardeinstellungen → Kurs-Zusatzfelder angelegten Feldes, z. B. "schule" oder "kohorte". Funktioniert zuverlässig für Text- und Auswahl-Felder. Ohne Eintrag bleibt der Filter auch bei aktivierter Checkbox oben wirkungslos.';
+$string['settings_coursefilters_desc'] = 'Legt fest, welche Kurse Trainer/innen überhaupt verknüpfen dürfen. Grundvoraussetzung ist immer die Rolle "Trainer/in mit Bearbeitungsrecht" - fest und nicht abschaltbar. Die folgenden Einstellungen erweitern das optional. Sie gelten automatisch und sind für Trainer/innen nicht abschaltbar - nur hier von Admins konfigurierbar. Website-Admins selbst sind immer ausgenommen.';
+$string['settings_restrictroleteacher'] = 'Auch Verknüpfung durch Trainer/innen ohne Bearbeitungsrecht erlauben';
+$string['settings_restrictroleteacher_desc'] = 'Erlaubt zusätzlich zur Grundvoraussetzung (Trainer/in mit Bearbeitungsrecht) das Verknüpfen von Kursen, in denen die Person als Trainer/in ohne Bearbeitungsrecht eingeschrieben ist.';
+$string['settings_restrictrolestudent'] = 'Auch Verknüpfung durch Kurse erlauben, in denen die Person nur Teilnehmer/in ist';
+$string['settings_restrictrolestudent_desc'] = 'Erlaubt zusätzlich zur Grundvoraussetzung (Trainer/in mit Bearbeitungsrecht) das Verknüpfen von Kursen, in denen die Person lediglich als Teilnehmer/in eingeschrieben ist. Nur wenn diese Einstellung aktiviert ist, bekommen Trainer/innen im Verknüpfungsformular die optionale Anzeige-Option "Nur Kurse anzeigen, in denen ich Trainer/in bin".';
+$string['settings_fieldfiltershortnames'] = 'Kurznamen der Kurs-Zusatzfelder';
+$string['settings_fieldfiltershortnames_desc'] = 'Kommagetrennte Liste von Kurznamen (nicht Anzeigenamen) von Feldern, die unter Website-Administration → Kurse → Kurs-Standardeinstellungen → Kurs-Zusatzfelder angelegt wurden, z. B. "schule,standort". Ein Kurs darf nur verknüpft werden, wenn er bei JEDEM angegebenen Feld denselben Wert hat wie der Hauptkurs der Aktivität (UND-Verknüpfung) - z. B. um in einem System mit vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Funktioniert zuverlässig für Text- und Auswahl-Felder. Für Trainer/innen nicht abschaltbar. Leer lassen, um diesen Filter nicht zu verwenden.';
 
 $string['nolinksyet'] = 'Es sind noch keine Kursverknüpfungen angelegt.';
 $string['viewnolinks'] = 'Für diese Aktivität wurden noch keine Kursverknüpfungen angelegt.';

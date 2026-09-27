@@ -20,6 +20,40 @@ defined('MOODLE_INTERNAL') || die();
 class course_filter {
 
     /**
+     * Welche Rollen-Archetypen einer Person erlauben, einen Kurs zu
+     * verlinken. "editingteacher" (Trainer/in mit Bearbeitungsrecht) ist
+     * die feste Grundvoraussetzung und nicht abschaltbar; die beiden
+     * Admin-Einstellungen erweitern sie optional auf schwaechere Rollen.
+     *
+     * @return string[]
+     */
+    public static function get_allowed_archetypes(): array {
+        $archetypes = ['editingteacher'];
+
+        if ((bool) get_config('mod_kursmodule', 'restrictroleteacher')) {
+            $archetypes[] = 'teacher';
+        }
+        if ((bool) get_config('mod_kursmodule', 'restrictrolestudent')) {
+            $archetypes[] = 'student';
+        }
+
+        return $archetypes;
+    }
+
+    /**
+     * Die im Adminpanel hinterlegten Kurs-Zusatzfeld-Kurznamen, aus einer
+     * kommagetrennten Liste geparst (Leerzeichen und leere Eintraege
+     * werden entfernt).
+     *
+     * @return string[]
+     */
+    public static function get_field_shortnames(): array {
+        $raw = (string) get_config('mod_kursmodule', 'fieldfiltershortnames');
+
+        return array_values(array_filter(array_map('trim', explode(',', $raw)), fn($s) => $s !== ''));
+    }
+
+    /**
      * Wendet die von Admins konfigurierten Einschraenkungen auf eine
      * Liste von Kursen an. Website-Admins (is_siteadmin()) sind davon
      * immer ausgenommen - die Einschraenkung gilt fuer Trainer/innen,
@@ -32,40 +66,46 @@ class course_filter {
      * @param int $maincourseid Hauptkurs der Kursmodule-Aktivitaet
      * @param int $currentcourseid aktuell verlinkter Kurs beim Bearbeiten (0 beim Anlegen)
      * @param int $userid
+     * @param bool $onlyteachingroles true blendet zusaetzlich eine evtl. erlaubte
+     *        Teilnehmer/in-Rolle wieder aus - reine Anzeige-Verfeinerung fuer die
+     *        optionale Checkbox im Formular, KEINE eigene Sicherheitsgrenze
+     *        (siehe link_form::validation(), die diesen Parameter bewusst nie setzt).
      * @return \stdClass[]
      */
-    public static function apply_restrictions(array $courses, int $maincourseid, int $currentcourseid, int $userid): array {
+    public static function apply_restrictions(
+        array $courses,
+        int $maincourseid,
+        int $currentcourseid,
+        int $userid,
+        bool $onlyteachingroles = false
+    ): array {
         global $DB;
 
         if (is_siteadmin($userid)) {
             return $courses;
         }
 
-        $allowedarchetypes = [];
-        if ((bool) get_config('mod_kursmodule', 'restrictroleediting')) {
-            $allowedarchetypes[] = 'editingteacher';
-        }
-        if ((bool) get_config('mod_kursmodule', 'restrictroleteacher')) {
-            $allowedarchetypes[] = 'teacher';
+        $archetypes = self::get_allowed_archetypes();
+        if ($onlyteachingroles) {
+            $archetypes = array_diff($archetypes, ['student']);
         }
 
-        if (!empty($allowedarchetypes)) {
-            $allowed = array_flip(self::get_courseids_by_roles($userid, $allowedarchetypes));
-            foreach (array_keys($courses) as $cid) {
-                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
-                    unset($courses[$cid]);
-                }
+        $allowed = array_flip(self::get_courseids_by_roles($userid, $archetypes));
+        foreach (array_keys($courses) as $cid) {
+            if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
+                unset($courses[$cid]);
             }
         }
 
-        $fieldshortname = trim((string) get_config('mod_kursmodule', 'fieldfiltershortname'));
-        if ((bool) get_config('mod_kursmodule', 'enablefieldfilter') && $fieldshortname !== '') {
-            $mainvalue = self::get_custom_field_value($maincourseid, $fieldshortname);
-            $allowed = $mainvalue !== null
-                ? array_flip(self::get_courseids_with_field_value($fieldshortname, $mainvalue))
+        // Kurs-Zusatzfelder: ein Kurs muss bei JEDEM konfigurierten Feld
+        // denselben Wert wie der Hauptkurs haben (UND-Verknuepfung).
+        foreach (self::get_field_shortnames() as $shortname) {
+            $mainvalue = self::get_custom_field_value($maincourseid, $shortname);
+            $matching = $mainvalue !== null
+                ? array_flip(self::get_courseids_with_field_value($shortname, $mainvalue))
                 : [];
             foreach (array_keys($courses) as $cid) {
-                if ($cid !== $currentcourseid && !isset($allowed[$cid])) {
+                if ($cid !== $currentcourseid && !isset($matching[$cid])) {
                     unset($courses[$cid]);
                 }
             }
@@ -155,26 +195,5 @@ class course_filter {
                    AND (cfd.shortcharvalue = :value1 OR cfd.value = :value2)";
 
         return array_keys($DB->get_records_sql($sql, ['shortname' => $shortname, 'value1' => $value, 'value2' => $value]));
-    }
-
-    /**
-     * Anzeigename eines Kurs-Zusatzfeldes (fuer das Label der Filter-
-     * Checkbox). Faellt auf den Kurznamen zurueck, falls das Feld nicht
-     * (mehr) existiert - z. B. weil die Einstellung veraltet ist.
-     *
-     * @param string $shortname
-     * @return string
-     */
-    public static function get_field_display_name(string $shortname): string {
-        global $DB;
-
-        $sql = "SELECT cff.name
-                  FROM {customfield_field} cff
-                  JOIN {customfield_category} cfc ON cfc.id = cff.categoryid
-                 WHERE cfc.component = 'core_course' AND cfc.area = 'course' AND cff.shortname = :shortname";
-
-        $name = $DB->get_field_sql($sql, ['shortname' => $shortname]);
-
-        return $name !== false && $name !== null ? format_string($name) : $shortname;
     }
 }

@@ -66,16 +66,17 @@ $string['errorcoursealreadylinked'] = 'This course is already linked.';
 
 $string['errorcoursenotallowed'] = 'This course is not available to you for linking under the site administration\'s settings.';
 
+$string['onlyteacherrole'] = 'Only show courses where I am a teacher';
+$string['applyfilter'] = 'Apply filter';
+
 $string['settings_coursefilters'] = 'Restrict course selection';
-$string['settings_coursefilters_desc'] = 'Controls which courses teachers are allowed to link at all. These restrictions apply automatically and cannot be turned off by teachers - only admins can configure them here. Site admins themselves are always exempt from both restrictions.';
-$string['settings_restrictroleediting'] = 'Allow linking by teachers with editing rights';
-$string['settings_restrictroleediting_desc'] = 'If at least one of the two role checkboxes is enabled, teachers may only link courses where they themselves hold one of the enabled roles. If both are disabled, no role restriction applies (as before).';
-$string['settings_restrictroleteacher'] = 'Allow linking by non-editing teachers';
-$string['settings_restrictroleteacher_desc'] = 'If at least one of the two role checkboxes is enabled, teachers may only link courses where they themselves hold one of the enabled roles. If both are disabled, no role restriction applies (as before).';
-$string['settings_enablefieldfilter'] = 'Only allow courses with a matching course custom field';
-$string['settings_enablefieldfilter_desc'] = 'Automatically restricts linkable courses to those whose custom field (set below) has the same value as the main course of the activity - e.g. to limit selection to one\'s own school in a system with many schools. Cannot be turned off by teachers. Requires the shortname of a course custom field (see below).';
-$string['settings_fieldfiltershortname'] = 'Course custom field shortname';
-$string['settings_fieldfiltershortname_desc'] = 'The shortname (not the display name) of a field created under Site administration → Courses → Course default settings → Course custom fields, e.g. "school" or "cohort". Works reliably for text and select fields. Leaving this empty makes the filter above ineffective even when enabled.';
+$string['settings_coursefilters_desc'] = 'Controls which courses teachers are allowed to link at all. Being an editing teacher in the target course is always the baseline requirement and cannot be turned off. The settings below optionally extend it. These restrictions apply automatically and cannot be turned off by teachers - only admins can configure them here. Site admins themselves are always exempt.';
+$string['settings_restrictroleteacher'] = 'Also allow linking by non-editing teachers';
+$string['settings_restrictroleteacher_desc'] = 'In addition to the baseline requirement (editing teacher), also allows linking courses where the person is enrolled as a non-editing teacher.';
+$string['settings_restrictrolestudent'] = 'Also allow courses where the person is only a participant';
+$string['settings_restrictrolestudent_desc'] = 'In addition to the baseline requirement (editing teacher), also allows linking courses where the person is only enrolled as a participant. Only when this is enabled do teachers get the optional display option "Only show courses where I am a teacher" in the link form.';
+$string['settings_fieldfiltershortnames'] = 'Course custom field shortnames';
+$string['settings_fieldfiltershortnames_desc'] = 'Comma-separated list of shortnames (not display names) of fields created under Site administration → Courses → Course default settings → Course custom fields, e.g. "school,site". A course may only be linked if it matches the main course of the activity on EVERY listed field (AND logic) - e.g. to limit selection to one\'s own school in a system with many schools. Works reliably for text and select fields. Cannot be turned off by teachers. Leave empty to disable this filter.';
 
 $string['nolinksyet'] = 'No course links have been added yet.';
 $string['viewnolinks'] = 'No course links have been set up for this activity yet.';

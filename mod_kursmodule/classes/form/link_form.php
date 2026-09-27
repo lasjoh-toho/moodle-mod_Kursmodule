@@ -41,11 +41,34 @@ class link_form extends \moodleform {
             'id, fullname, shortname'
         );
 
+        // Einzige Ausnahme von der Regel "keine Checkboxen fuer Trainer/innen":
+        // Ist die reine Teilnehmer/innen-Rolle von den Admins ueberhaupt
+        // zugelassen (course_filter::get_allowed_archetypes()), koennen
+        // Trainer/innen diese zusaetzlich erlaubten Kurse ueber eine rein
+        // clientseitige Anzeige-Verfeinerung wieder ausblenden. Das ist
+        // keine Sicherheitsgrenze - siehe validation(), die diese Option
+        // bewusst ignoriert.
+        $studentallowed = in_array('student', \mod_kursmodule\course_filter::get_allowed_archetypes(), true);
+        $showteacheronlytoggle = $studentallowed && !is_siteadmin((int) $USER->id);
+
+        if ($showteacheronlytoggle) {
+            $mform->addElement('advcheckbox', 'onlyteacherrole', '', get_string('onlyteacherrole', 'mod_kursmodule'));
+            $mform->addElement('submit', 'applyfilter', get_string('applyfilter', 'mod_kursmodule'));
+            $mform->registerNoSubmitButton('applyfilter');
+        }
+        $onlyteacherrole = $showteacheronlytoggle && optional_param('onlyteacherrole', 0, PARAM_BOOL);
+
         // Von Admins festgelegte Einschraenkungen, welche Kurse ueberhaupt
         // verlinkt werden duerfen (siehe settings.php) - nicht optional
         // fuer Trainer/innen, daher hier ohne Checkbox automatisch
         // angewendet. Website-Admins sind ausgenommen (course_filter::apply_restrictions()).
-        $courses = \mod_kursmodule\course_filter::apply_restrictions($courses, $excludecourseid, $currentcourseid, (int) $USER->id);
+        $courses = \mod_kursmodule\course_filter::apply_restrictions(
+            $courses,
+            $excludecourseid,
+            $currentcourseid,
+            (int) $USER->id,
+            $onlyteacherrole
+        );
 
         // Leere Option voranstellen: ohne sie waehlt ein natives <select> immer
         // den ersten Eintrag automatisch vor, das Feld war dadurch beim

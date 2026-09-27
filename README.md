@@ -76,20 +76,25 @@ einfacher, hat aber eine Kehrseite:
   dabei bewusst nicht mitkopiert.
 - Unter *Website-Administration → Module → Aktivitäten → Kursmodule*
   können Admins einschränken, welche Kurse Trainer/innen überhaupt
-  verlinken dürfen - für Trainer/innen nicht abschaltbar, es gibt dafür
-  bewusst keine Checkbox im Verknüpfungsformular. Zwei unabhängige
-  Einschränkungen: (1) Rollen-Checkboxen "mit Bearbeitungsrecht" /
-  "ohne Bearbeitungsrecht" - ist mindestens eine aktiviert, dürfen
-  Trainer/innen nur noch Kurse verlinken, in denen sie selbst eine der
-  aktivierten Rollen innehaben; sind beide deaktiviert, gilt keine
-  Rollen-Einschränkung. (2) "Übereinstimmendes Kurs-Zusatzfeld" - nur
-  Kurse, deren per Kurzname angegebenes Kurs-Zusatzfeld denselben Wert
-  hat wie der Hauptkurs der Aktivität, z. B. um in einem System mit
-  vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Beide
+  verlinken dürfen - für Trainer/innen nicht abschaltbar. Grund-
+  voraussetzung ist immer die Rolle "Trainer/in mit Bearbeitungsrecht"
+  im Zielkurs, fest und nicht konfigurierbar. Zwei Checkboxen erweitern
+  das optional: (1) "auch Trainer/in ohne Bearbeitungsrecht" und (2)
+  "auch Kurse, in denen die Person nur Teilnehmer/in ist". Nur wenn (2)
+  aktiviert ist, bekommen Trainer/innen im Verknüpfungsformular eine
+  einzelne optionale Anzeige-Checkbox "Nur Kurse anzeigen, in denen ich
+  Trainer/in bin" - eine reine Anzeige-Verfeinerung ohne
+  Sicherheitsfunktion, mit der sie die neu erlaubten
+  Teilnehmer/innen-Kurse bei Bedarf wieder ausblenden können.
+  Zusätzlich lässt sich eine kommagetrennte Liste von Kurs-
+  Zusatzfeld-Kurznamen hinterlegen: Ein Kurs darf nur verlinkt werden,
+  wenn er bei JEDEM angegebenen Feld denselben Wert wie der Hauptkurs
+  der Aktivität hat (UND-Verknüpfung), z. B. um in einem System mit
+  vielen Schulen die Auswahl auf die eigene Schule zu begrenzen. Alle
   Einschränkungen sind serverseitig erzwungen (nicht nur in der
   Dropdown-Liste) und gelten nicht für Website-Admins selbst. Ohne
   Konfiguration (Standardzustand) bleibt das Verhalten wie zuvor,
-  keine Einschränkung.
+  keine zusätzliche Einschränkung.
 
 ## Bekannte Einschränkungen
 
